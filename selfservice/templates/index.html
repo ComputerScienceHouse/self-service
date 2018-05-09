@@ -1,4 +1,29 @@
 {% extends 'base.html' %}
 {% block body %}
-Hello World
+<section class="reset">
+	<div class="container">
+	{% include "include/logo.html" %}
+
+		<div class="alert alert-warning mb-3" role="alert">
+		    	Welcome to SARA, the Self-Service Acount Recovery Application. If you are locked out, hopefully we can get you back into your account automatically. If not, you will be contacted by an RTP to manually verify your identity. 
+		</div>
+
+		<div class="card mb-3">
+		  <div class="card-body">
+		  	<h5 class="card-title">Okay, lets get started.</h5>
+			<form action="/recovery" method="post">
+
+			    <label for="username">CSH Username</label>
+			    <input type="text" class="form-control mb-2" id="username" name="username">
+			    <center>
+			    {{recaptcha}}
+				<button type="submit" class="btn btn-info mt-2" style=>Recover Account</button>
+			</center>
+			</form>
+
+		  </div>
+		</div>
+	</div>
+</section>
+<div class="background"> </div>
 {% endblock %}

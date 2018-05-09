@@ -1,0 +1,38 @@
+.background {
+    width: 100%;
+    background-color: rgb(176, 25, 126);
+    background-image: linear-gradient(rgb(67, 10, 48), rgb(176, 25, 126));
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -1 !important;
+}
+
+.reset {
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.container {
+    max-width: 500px !important;
+    text-align: center;
+}
+
+.panel {
+    pointer-events: auto;
+  }
+
+  .logo {
+    margin-bottom: 30px;
+    max-width: 300px;
+
+    fill: #fff;
+  }
