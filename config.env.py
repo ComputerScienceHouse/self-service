@@ -24,3 +24,9 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
     'sqlite:///{}'.format(os.path.join(os.getcwd(), 'data.db')))
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+RECAPTCHA_ENABLED = True
+RECAPTCHA_SITE_KEY = os.environ.get('RECAPTCHA_SITE_KEY', '')
+RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', '')
+RECAPTCHA_THEME = "light"
+RECAPTCHA_TYPE = "image"
+RECAPTCHA_SIZE = "normal"
