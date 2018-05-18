@@ -1,6 +1,8 @@
 import os
 import uuid
 
+from csh_ldap import CSHLDAP
+
 from flask import Flask, render_template, request, redirect, url_for
 from flask_recaptcha import ReCaptcha
 from flask_sqlalchemy import SQLAlchemy
@@ -23,6 +25,9 @@ migrate = Migrate(app, db)
 # Create recaptcha object
 recaptcha = ReCaptcha()
 recaptcha.init_app(app)
+
+# Connect to LDAP
+ldap = CSHLDAP(app.config['LDAP_BIND_DN'], app.config['LDAP_BIND_PW'])
 
 # Now, that we have everything configured we can grab
 # the utilities we need.
@@ -65,4 +70,6 @@ def verify_identity(recovery_id):
 	if is_expired(session.created, 10):
 		return redirect("/")
 
-	return str(verif_methods(session.username))
+	return render_template('options.html',
+		username = session.username,
+		methods = verif_methods(session.username))

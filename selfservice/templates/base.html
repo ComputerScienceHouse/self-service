@@ -7,7 +7,7 @@
         <meta name="description" content="">
         <meta name="author" content="Marc Billow">
 
-        <title>Selections</title>
+        <title>Account Recovery</title>
 
         <meta name="theme-color" content="#B0197E">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -23,12 +23,14 @@
 {% endblock %}
 
 <body>
+    <section class="reset">
+        <div class="container">
+        {% include "include/logo.html" %}
+        {% block body %}
 
-
-{% block body %}
-
-{% endblock %}
-
+        {% endblock %}
+        </div>
+    </section>
 
 {% block scripts %}
     {% include "include/scripts.html" %}

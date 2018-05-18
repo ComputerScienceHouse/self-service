@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="card mb-3">
+	<div class="card-body" style="text-align: left;">
+		{% if methods %}
+			<h3 class="card-title mb-3">Account Recovery</h3>
+			<h5 class="card-subtitle mb-4 text-muted">
+				<i class="fas fa-user" style="margin-right: 5px;"></i>
+				{{username}}@csh.rit.edu
+			</h5>
+			<p class="card-text mb-4">
+				This helps show that this account really belongs to you.
+			</p>
+			{% for method in methods %}
+				{% if method == "email" %}
+					{% for email in methods[method] %}
+						<div class="card border-success mb-3" style="width: 100%;">
+							<div class="card-body">
+								<div class="row">
+									<div class="col-2 col-vertical-center">
+										<h1 class="text-success mb-0">
+											<i class="fas fa-envelope"></i>
+										</h1>
+									</div>
+									<div class="col-9 pl-1">
+										<h5 class="card-title mb-1">External Email</h5>
+										<p class="card-text">{{email["display"]}}</p>
+									</div>
+									<div class="col-1 pl-0">
+										<h1 class="text-success mb-0">
+											<i class="fas fa-chevron-right"></i>
+										</h1>
+									</div>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				{% endif %}
+
+				{% if method == "phone" %}
+					{% for phone in methods[method] %}
+						<div class="card border-info mb-3" style="width: 100%;">
+							<div class="card-body">
+								<div class="row">
+									<div class="col-2 col-vertical-center">
+										<h1 class="text-info mb-0">
+											<i class="fas fa-mobile-alt"></i>
+										</h1>
+									</div>
+									<div class="col-9 pl-1">
+										<h5 class="card-title mb-1">SMS Number</h5>
+										<p class="card-text">{{phone["display"]}}</p>
+									</div>
+									<div class="col-1 pl-0">
+										<h1 class="text-info mb-0">
+											<i class="fas fa-chevron-right"></i>
+										</h1>
+									</div>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				{% endif %}
+
+				{% if method == "rit" %}
+					<div class="card border-warning mb-3" style="width: 100%;">
+						<div class="card-body">
+							<div class="row">
+								<div class="col-2 col-vertical-center">
+									<h1 class="text-warning mb-0">
+										<i class="fas fa-graduation-cap"></i>
+									</h1>
+								</div>
+								<div class="col-9 pl-1">
+									<h5 class="card-title mb-1">RIT Account</h5>
+									<p class="card-text">{{methods["rit"]}}</p>
+								</div>
+								<div class="col-1 pl-0">
+									<h1 class="text-warning mb-0">
+										<i class="fas fa-chevron-right"></i>
+									</h1>
+								</div>
+							</div>
+						</div>
+					</div>
+				{% endif %}
+			{% endfor %}
+		{% else %}
+			<h3 class="card-title mb-3">Couldn't sign you in...</h3>
+			<h5 class="card-subtitle mb-3 text-muted">
+				<i class="fas fa-user" style="margin-right: 5px;"></i>
+				{{username}}@csh.rit.edu
+			</h5>
+			<p class="card-text">
+				To recover your account, contact a Root Type Person.
+			</p>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}
