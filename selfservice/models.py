@@ -8,6 +8,8 @@ class ResetToken(db.Model):
     id = Column(Integer, primary_key=True)
     username = Column(String(64), nullable=False)
     created = Column(DateTime, default=func.current_timestamp())
+    token = Column(String(36))
+    session = Column(String(36), ForeignKey('session.id'))
 
 
 class RecoverySession(db.Model):
@@ -19,5 +21,5 @@ class RecoverySession(db.Model):
 
 class PhoneVerification(db.Model):
 	__tablename__ = 'phone_codes'
-	username = Column(String(64), primary_key=True)
 	code = Column(String(6), primary_key=True)
+	session = Column(String(36), ForeignKey('session.id'))
