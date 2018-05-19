@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="card mb-3">
+	<div class="card-body" style="text-align: left;">
+		<h3 class="card-title mb-3">Account Recovery</h3>
+		<h5 class="card-subtitle mb-4 text-muted">
+			<i class="fas fa-user" style="margin-right: 5px;"></i>
+			{{username}}@csh.rit.edu
+		</h5>
+		{% if choose_carrier %}
+		<p class="card-text mb-4">
+			In order to verify your identity, we need to know which carrier the phone number ending in {{phone}} belongs to.
+		</p>
+		<div class="row">
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=alltel">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/alltel.png" alt="AllTel" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=att">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/att.png" alt="AT&T" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=boost">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/boost.png" alt="Boost Mobile" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=cricket">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/cricket.png" alt="Cricket" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=sprint">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/sprint.png" alt="Sprint" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=tmobile">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/tmobile.png" alt="T-Mobile" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=us">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/us.png" alt="US Cellular" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=verizon">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/verizon.png" alt="Verizon" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-6 col-sm-4">
+				<a href="/recovery/{{recovery_id}}/phone?index={{index}}&carrier=virgin">
+					<div class="card mb-3" style="width: 100%;">
+						<div class="card-body">
+							<img src="/static/images/carriers/virgin.png" alt="Virgin Mobile" width=100%>
+						</div>
+					</div>
+				</a>
+			</div>
+		</div>
+		{% else %}
+		<p class="card-text mb-4">
+			Please enter the confirmation number sent to you.
+		</p>
+		<form action="/recovery/{{recovery_id}}/phone/verify" method="post">
+			<input type="text" class="form-control mb-2" id="verify" name="verify" placeholder="Verification Code">
+			<div style="width: 100%; text-align: right;">
+				<button type="submit" class="btn btn-success mt-2">
+					Submit <i class="fas fa-check"></i>
+				</button>
+			</div>
+		</form>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}
