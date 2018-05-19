@@ -6,7 +6,8 @@ from csh_ldap import CSHLDAP
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_recaptcha import ReCaptcha
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from flask_migrate import Migrate, upgrade
+from alembic import command
 
 from selfservice.utilities.general import is_expired, email_recovery, phone_recovery
 
@@ -22,6 +23,10 @@ else:
 db = SQLAlchemy(app)
 from selfservice.models import *
 migrate = Migrate(app, db)
+
+if not os.path.exists(os.path.join(os.getcwd(), "data.db")):
+	with app.app_context():
+		upgrade()
 
 # Create recaptcha object
 recaptcha = ReCaptcha()
