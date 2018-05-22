@@ -51,11 +51,17 @@ def create_session():
 
 		# If we can't find an account, flash error.
 		try:
-			ldap.get_member(request.form["username"], True)
+			member = ldap.get_member(request.form["username"], True)
 		except KeyError:
 			flash("Uh oh, either that account doesn't exist or we don't have " +\
 				  "a way to verify your identity. Make sure you entered the " +\
 				  "correct username or contact an RTP (rtp@csh.rit.edu).")
+			return redirect("/")
+
+		rtp_dn = "cn=rtp,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu"
+		if rtp_dn in member.groups():
+			flash("For security reasons, RTPs cannot use this form. Please " +\
+				  "email rtp@csh.rit.edu for further assistance.")
 			return redirect("/")
 
 		# Generate a random UUID for session object.
@@ -77,17 +83,30 @@ def verify_identity(recovery_id):
 
 	# Retrieve the session object.
 	session = RecoverySession.query.filter_by(id=recovery_id).first()
+	methods = verif_methods(session.username)
 
 	# Make sure it isn't expired.
 	if is_expired(session.created, 10):
 		flash("Sorry, your session has expired.")
 		return redirect("/")
 
+	# Make sure that methods are valid
+	possible_methods = 0
+	for method in methods:
+		if methods[method]:
+			possible_methods += 1
+
+	if possible_methods == 0:
+		flash("We weren't able to find any information attached to your account " +\
+			  "which could be used to automatically recover it. Please email " +\
+			  "rtp@csh.rit.edu for futher assistance.")
+		return redirect("/")
+
 
 	return render_template('options.html',
 		username = session.username,
 		recovery_id = recovery_id,
-		methods = verif_methods(session.username))
+		methods = methods)
 
 
 @app.route('/recovery/<recovery_id>/<method>')
