@@ -1,8 +1,12 @@
+import requests
+import random
 import uuid
+import ldap
+
 from selfservice.models import RecoverySession, ResetToken, PhoneVerification
 from selfservice.utilities.general import is_expired
-from selfservice import db
-import random
+from selfservice import db, app
+
 
 class TokenAlreadyExists(Exception):
     pass
@@ -20,7 +24,8 @@ def generate_token(session):
 	reset = ResetToken(
 		username=session.username,
 		token=token,
-		session=session.id)
+		session=session.id,
+		used=False)
 	db.session.add(reset)
 	db.session.commit()
 
@@ -53,3 +58,25 @@ def valid_token(token_id):
 		return True
 	else:
 		return False
+
+
+def passwd_reset(username, password):
+	# Create LDAP admin session to perform initial reset.
+	dn = "uid={},cn=users,cn=accounts,dc=csh,dc=rit,dc=edu".format(
+		username)
+	
+	l = ldap.initialize("ldaps://stone.csh.rit.edu")
+	l.simple_bind_s(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
+	l.modify_s(
+		dn, [(ldap.MOD_REPLACE,'userPassword',[password.encode()])]
+		)
+
+	# FreeIPA automatically expires the password set through the previous
+	# method, so we need to use their password change API to get past that.
+	change = requests.post(
+		"https://stone.csh.rit.edu/ipa/session/change_password",
+		data={
+			"user": username,
+			"old_password": password,
+			"new_password": password})
+

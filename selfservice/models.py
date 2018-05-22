@@ -10,6 +10,7 @@ class ResetToken(db.Model):
     created = Column(DateTime, default=func.current_timestamp())
     token = Column(String(36))
     session = Column(String(36), ForeignKey('session.id'))
+    used = Column(Boolean)
 
 
 class RecoverySession(db.Model):

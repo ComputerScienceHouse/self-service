@@ -5,7 +5,12 @@
 		<div style="transform: scale(1.5, 1.5);"><svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>
 		</div>
 		<h3>Success!</h3>
+		{% if not reset %}
 		<p>We sent a recovery link to the contact method you selected! If you don't receive anything in the next few minutes, try again with a different method or contact an RTP (rtp@csh.rit.edu).</p>
+		{% else %}
+		<p>Your password has been reset! Please take this opportunity to head over to <a href="https://profiles.csh.rit.edu">Profiles</a> and update your contact information. It will make this process easier in the future and makes sure you get important house updates.</p>
+		<p>If you have any questions about house services, please email the RTPs or join #opcomm on CSH Slack.</p>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}

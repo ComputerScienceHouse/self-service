@@ -37,7 +37,8 @@ ldap = CSHLDAP(app.config['LDAP_BIND_DN'], app.config['LDAP_BIND_PW'])
 
 # Now, that we have everything configured we can grab
 # the utilities we need.
-from selfservice.utilities.reset import generate_token, generate_pin, TokenAlreadyExists
+from selfservice.utilities.reset import generate_token, generate_pin, \
+										passwd_reset,TokenAlreadyExists
 from selfservice.utilities.ldap import verif_methods
 
 # Flask Routes
@@ -176,4 +177,42 @@ def verify_phone(recovery_id):
 	else:
 		flash("Your verification code did not match, sorry!")
 		return redirect("/")
-		
+
+
+@app.route('/reset', methods=['GET', 'POST'])
+def reset_password():
+	token = request.args.get('token', default = '', type = str)
+
+	token_data = ResetToken.query.filter_by(token=token).first()
+
+	# Redirect if the token provided isn't valid.
+	if not token or not token_data or is_expired(token_data.created, 30) \
+	or token_data.used:
+		flash("Oops! Invalid or expired reset token. Each token is only " +\
+			  "valid for 30 minutes after it is issued.")
+		return redirect("/")
+
+	# Display the reset page.
+	if request.method == 'GET':
+		return render_template('reset.html',
+			token = token_data.token)
+
+	# Lets actually do the reset.
+	if request.form["password"] == request.form["verify"]:
+		if len(request.form["password"]) >= 12:
+			try:
+				passwd_reset(
+					username=token_data.username,
+					password=request.form["password"])
+				return render_template('success.html',
+					reset=True)
+			except:
+				flash("LDAP Error Occurred... Please contact an RTP.")
+		else:
+			flash("Your password does not meet the requirements below.")
+	else:
+		flash("Whoops, those passwords didn't match!")
+	
+	return redirect("/reset?token={}".format(token))
+
+

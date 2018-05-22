@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block body %}
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning" role="alert">
+			 	{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+<div class="card mb-3">
+	<div class="card-body">
+		<h3 class="card-title mb-3">Account Recovery</h3>
+		<p class="card-text mb-4">
+			Okay, it is time to pick a new password. Make sure it has at least 12 characters and two character classes (Uppercase, lowercase, numbers, or symbols).
+		</p>
+		<form action="/reset?token={{token}}" method="post">
+			<input type="password" class="form-control mb-2" id="password" name="password" placeholder="New Password">
+			<input type="password" class="form-control mb-2" id="verify" name="verify" placeholder="Repeat Password">
+			<div style="width: 100%; text-align: right;">
+				<button type="submit" class="btn btn-success mt-2">
+					Submit <i class="fas fa-check"></i>
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}
