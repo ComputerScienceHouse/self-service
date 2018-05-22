@@ -204,6 +204,8 @@ def reset_password():
 				passwd_reset(
 					username=token_data.username,
 					password=request.form["password"])
+				token_data.used = True
+				db.session.commit()
 				return render_template('success.html',
 					reset=True)
 			except:
