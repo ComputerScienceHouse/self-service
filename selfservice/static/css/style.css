@@ -25,6 +25,14 @@ a:hover {
     text-decoration: none;
 }
 
+footer > div > p > a,
+footer > div > p > a:visited,
+footer > div > p > a:hover,
+footer {
+  color: #fff !important;
+  text-decoration: none;
+}
+
 .reset {
   display: flex;
   position: absolute;

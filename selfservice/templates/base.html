@@ -29,15 +29,14 @@
         {% block body %}
 
         {% endblock %}
+        {% block footer %}
+            {% include "include/footer.html" %}
+        {% endblock %}
         </div>
     </section>
 
 {% block scripts %}
     {% include "include/scripts.html" %}
-{% endblock %}
-
-{% block page_scripts %}
-
 {% endblock %}
 
 </body>

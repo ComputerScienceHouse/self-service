@@ -1,5 +1,6 @@
 import os
 import uuid
+import subprocess
 
 from csh_ldap import CSHLDAP
 
@@ -18,6 +19,10 @@ if os.path.exists(os.path.join(os.getcwd(), "config.py")):
     app.config.from_pyfile(os.path.join(os.getcwd(), "config.py"))
 else:
     app.config.from_pyfile(os.path.join(os.getcwd(), "config.env.py"))
+
+# Get Git Revision
+version = subprocess.check_output(
+	['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').rstrip()
 
 # Create the database session and import models.
 db = SQLAlchemy(app)
@@ -41,7 +46,8 @@ from selfservice.utilities.ldap import verif_methods
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html',
+    	version = version)
 
 
 @app.route('/recovery', methods=['POST'])
@@ -76,6 +82,9 @@ def create_session():
 
 		# Redirect the user to thier session.
 		return redirect("/recovery/" + session_id)
+	else:
+		flash("Please complete the reCaptcha.")
+		return redirect("/")
 
 
 @app.route('/recovery/<recovery_id>')
@@ -106,7 +115,8 @@ def verify_identity(recovery_id):
 	return render_template('options.html',
 		username = session.username,
 		recovery_id = recovery_id,
-		methods = methods)
+		methods = methods,
+    	version = version)
 
 
 @app.route('/recovery/<recovery_id>/<method>')
@@ -143,7 +153,8 @@ def method_selection(recovery_id, method):
 				username = session.username,
 				address = rec_email,
 				token = token)
-			return render_template('success.html')
+			return render_template('success.html',
+    			version = version)
 		except:
 			flash("Uh oh, something went wrong. Please try again later.")
 			return redirect("/")
@@ -154,7 +165,8 @@ def method_selection(recovery_id, method):
 			recovery_id = session.id,
 			index = index,
 			username = session.username,
-			choose_carrier = True)
+			choose_carrier = True,
+    		version = version)
 
 	elif method == "phone" and carrier:
 		try:
@@ -173,7 +185,8 @@ def method_selection(recovery_id, method):
 			return render_template('phone.html',
 				recovery_id = session.id,
 				username = session.username,
-				choose_carrier = False)
+				choose_carrier = False,
+    			version = version)
 		except:
 			flash("Uh oh, something went wrong. Please try again later.")
 			return redirect("/")
@@ -210,7 +223,8 @@ def reset_password():
 	# Display the reset page.
 	if request.method == 'GET':
 		return render_template('reset.html',
-			token = token_data.token)
+			token = token_data.token,
+    		version = version)
 
 	# Lets actually do the reset.
 	if request.form["password"] == request.form["verify"]:
@@ -222,7 +236,8 @@ def reset_password():
 				token_data.used = True
 				db.session.commit()
 				return render_template('success.html',
-					reset=True)
+					reset=True,
+    				version = version)
 			except:
 				flash("LDAP Error Occurred... Please contact an RTP.")
 		else:
