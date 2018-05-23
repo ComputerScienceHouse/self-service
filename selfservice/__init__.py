@@ -7,6 +7,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_recaptcha import ReCaptcha
 from flask_sqlalchemy import SQLAlchemy
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 
 app = Flask(__name__)
@@ -37,6 +39,13 @@ auth = OIDCAuthentication(
 
 # Connect to LDAP
 ldap = CSHLDAP(app.config['LDAP_BIND_DN'], app.config['LDAP_BIND_PW'])
+
+# Configure rate limiting
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["50 per day", "10 per hour"]
+)
 
 # Import blueprints
 from selfservice.blueprints.recovery import recovery_bp
