@@ -12,7 +12,7 @@ LDAP_BIND_DN=os.environ.get('LDAP_BIND_DN', 'krbprincipalname=null,cn=services,c
 LDAP_BIND_PW=os.environ.get('LDAP_BIND_PW', '')
 
 # OpenID Connect SSO config
-OIDC_ISSUER = os.environ.get('OIDC_ISSUER', 'https://sso.csh.rit.edu/realms/csh')
+OIDC_ISSUER = os.environ.get('OIDC_ISSUER', 'https://sso.csh.rit.edu/auth/realms/csh')
 OIDC_CLIENT_CONFIG = {
     'client_id': os.environ.get('OIDC_CLIENT_ID', 'selfservice'),
     'client_secret': os.environ.get('OIDC_CLIENT_SECRET', ''),

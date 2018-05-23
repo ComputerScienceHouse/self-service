@@ -1,4 +1,5 @@
 from selfservice import app, ldap
+import json
 import re
 
 def verif_methods(username):
@@ -37,3 +38,9 @@ def verif_methods(username):
 
 	return methods
 
+def get_members():
+	members = ldap.get_group("member").get_members()
+	disp_mbr = []
+	for member in members:
+		disp_mbr.append({"display": member.displayName, "value": member.uid})
+	return disp_mbr

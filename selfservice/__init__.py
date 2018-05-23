@@ -5,6 +5,8 @@ import subprocess
 from csh_ldap import CSHLDAP
 
 from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_pyoidc.flask_pyoidc import OIDCAuthentication
+from flask import session as flask_session
 from flask_recaptcha import ReCaptcha
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -33,6 +35,12 @@ migrate = Migrate(app, db)
 recaptcha = ReCaptcha()
 recaptcha.init_app(app)
 
+# OIDC Initialization
+auth = OIDCAuthentication(
+	app,
+	issuer=app.config["OIDC_ISSUER"],
+	client_registration_info=app.config["OIDC_CLIENT_CONFIG"])
+
 # Connect to LDAP
 ldap = CSHLDAP(app.config['LDAP_BIND_DN'], app.config['LDAP_BIND_PW'])
 
@@ -40,7 +48,7 @@ ldap = CSHLDAP(app.config['LDAP_BIND_DN'], app.config['LDAP_BIND_PW'])
 # the utilities we need.
 from selfservice.utilities.reset import generate_token, generate_pin, \
 										passwd_reset,TokenAlreadyExists
-from selfservice.utilities.ldap import verif_methods
+from selfservice.utilities.ldap import verif_methods, get_members
 
 # Flask Routes
 
@@ -247,4 +255,17 @@ def reset_password():
 	
 	return redirect("/reset?token={}".format(token))
 
+
+@app.route('/admin', methods=['GET', 'POST'])
+@auth.oidc_auth
+def admin():
+	if 'rtp' not in flask_session["userinfo"].get('groups'):
+		flash("Nice try. 😉")
+		return redirect("/")
+
+	members  = get_members()
+
+	return render_template('admin.html',
+		version = version,
+		members = members)
 
