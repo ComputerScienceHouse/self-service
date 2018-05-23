@@ -263,9 +263,30 @@ def admin():
 		flash("Nice try. 😉")
 		return redirect("/")
 
-	members  = get_members()
+	if request.method == "GET":
+		members  = get_members()
+
+		return render_template('admin.html',
+			version = version,
+			members = members)
+
+	# Generate a random UUID for session object.
+	session_id = str(uuid.uuid4())
+
+	# Create the object in the database.
+	session = RecoverySession(
+		id=session_id,
+		username=request.form["username"])
+	db.session.add(session)
+	db.session.commit()
+
+	token = generate_token(session)
 
 	return render_template('admin.html',
 		version = version,
-		members = members)
+		token = token)
+
+	
+
+
 
