@@ -11,20 +11,37 @@
 {% endwith %}
 <div class="card mb-3">
 	<div class="card-body" style="text-align: left;">
-		<h3 class="card-title">Account Recovery</h3>
+		<h3 class="card-title">Account Management</h3>
 		<p class="card-text">
-			Recover your CSH Account
+			Select an option below to begin.
 		</p>
-		<form action="/recovery" method="post">
-			<input type="text" class="form-control mb-2" id="username" name="username" placeholder="CSH Username">
-			{{recaptcha}}
-			<div style="width: 100%; text-align: right;">
-				<button type="submit" class="btn btn-info mt-2">
-					Next <i class="fas fa-chevron-right"></i>
-				</button>
-			</div>
-		</form>
-
+	</div>
+</div>
+<div class="card mb-3">
+	<div class="card-body" style="text-align: left;">
+		<h4 class="card-title">Change Password</h4>
+		<p class="card-text">
+			If you already know your password and want to change it.
+		</p>
+		<a href="/change" class="btn btn-info mt-2" style="color: #fff; width: 100%">
+			<i class="fas fa-unlock"></i> Change Password
+		</a>
+		<hr>
+		<h4 class="card-title">Configure Two Factor</h4>
+		<p class="card-text">
+			Make your account more secure by enabling two factor authentication.
+		</p>
+		<a href="" class="btn btn-success mt-2" style="color: #fff; width: 100%">
+			<i class="fas fa-mobile-alt"></i> Configure Two Factor
+		</a>
+		<hr>
+		<h4 class="card-title">Recover Account</h4>
+		<p class="card-text">
+			Completely forgot your password? Verify your identity and reset your password automatically.
+		</p>
+		<a href="/recovery" class="btn btn-warning mt-2" style="color: #fff; width: 100%">
+			<i class="fas fa-medkit"></i> Recover Account
+		</a>
 	</div>
 </div>
 {% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block body %}
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning" role="alert">
+			 	{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+<div class="card mb-3">
+	<div class="card-body" style="text-align: left;">
+		<h3 class="card-title">Account Recovery</h3>
+		<p class="card-text">
+			Recover your CSH Account
+		</p>
+		<form action="/recovery" method="post">
+			<input type="text" class="form-control mb-2" id="username" name="username" placeholder="CSH Username">
+			{{recaptcha}}
+			<div style="width: 100%; text-align: right;">
+				<button type="submit" class="btn btn-info mt-2">
+					Next <i class="fas fa-chevron-right"></i>
+				</button>
+			</div>
+		</form>
+
+	</div>
+</div>
+{% endblock %}

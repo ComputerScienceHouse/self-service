@@ -11,6 +11,9 @@ from selfservice import db, app
 class TokenAlreadyExists(Exception):
     pass
 
+class PasswordChangeFailed(Exception):
+    pass
+
 def generate_token(session):
 	# Generate a random UUID for reset token.
 	token = str(uuid.uuid4())
@@ -64,7 +67,7 @@ def passwd_reset(username, password):
 	# Create LDAP admin session to perform initial reset.
 	dn = "uid={},cn=users,cn=accounts,dc=csh,dc=rit,dc=edu".format(
 		username)
-	
+
 	l = ldap.initialize("ldaps://stone.csh.rit.edu")
 	l.simple_bind_s(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
 	l.modify_s(
@@ -80,3 +83,12 @@ def passwd_reset(username, password):
 			"old_password": password,
 			"new_password": password})
 
+def passwd_change(username, old_pw, new_pw):
+	change = requests.post(
+		"https://stone.csh.rit.edu/ipa/session/change_password",
+		data={
+			"user": username,
+			"old_password": old_pw,
+			"new_password": new_pw})
+	if change.headers.get("X-IPA-Pwchange-Result") == "invalid-password":
+		raise PasswordChangeFailed

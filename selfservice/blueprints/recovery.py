@@ -16,8 +16,12 @@ from selfservice import db, auth, recaptcha, ldap, version
 
 recovery_bp = Blueprint('recovery', __name__)
 
-@recovery_bp.route('/recovery', methods=['POST'])
+@recovery_bp.route('/recovery', methods=['GET', 'POST'])
 def create_session():
+
+	if request.method == "GET":
+		return render_template('recovery.html',
+    		version = version)
 
 	if recaptcha.verify():
 
@@ -28,13 +32,13 @@ def create_session():
 			flash("Uh oh, either that account doesn't exist or we don't have " +\
 				  "a way to verify your identity. Make sure you entered the " +\
 				  "correct username or contact an RTP (rtp@csh.rit.edu).")
-			return redirect("/")
+			return redirect("/recovery")
 
 		rtp_dn = "cn=rtp,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu"
 		if rtp_dn in member.groups():
 			flash("For security reasons, RTPs cannot use this form. Please " +\
 				  "email rtp@csh.rit.edu for further assistance.")
-			return redirect("/")
+			return redirect("/recovery")
 
 		# Generate a random UUID for session object.
 		session_id = str(uuid.uuid4())
@@ -50,7 +54,7 @@ def create_session():
 		return redirect("/recovery/" + session_id)
 	else:
 		flash("Please complete the reCaptcha.")
-		return redirect("/")
+		return redirect("/recovery")
 
 
 @recovery_bp.route('/recovery/<recovery_id>')
@@ -63,7 +67,7 @@ def verify_identity(recovery_id):
 	# Make sure it isn't expired.
 	if is_expired(session.created, 10):
 		flash("Sorry, your session has expired.")
-		return redirect("/")
+		return redirect("/recovery")
 
 	# Make sure that methods are valid
 	possible_methods = 0
@@ -75,7 +79,7 @@ def verify_identity(recovery_id):
 		flash("We weren't able to find any information attached to your account " +\
 			  "which could be used to automatically recover it. Please email " +\
 			  "rtp@csh.rit.edu for futher assistance.")
-		return redirect("/")
+		return redirect("/recovery")
 
 
 	return render_template('options.html',
@@ -98,7 +102,7 @@ def method_selection(recovery_id, method):
 	# Make sure it isn't expired.
 	if is_expired(session.created, 10):
 		flash("Sorry, your session has expired.")
-		return redirect("/")
+		return redirect("/recovery")
 
 	
 	# Get Method
@@ -110,7 +114,7 @@ def method_selection(recovery_id, method):
 			flash("This session has already been used to generate an " +\
 				  "email recovery token. Please wait for the session to " +\
 				  "expire and try again or contact an RTP.")
-			return redirect("/")
+			return redirect("/recovery")
 
 		rec_email = methods["email"][index]["data"]
 
@@ -123,7 +127,7 @@ def method_selection(recovery_id, method):
     			version = version)
 		except:
 			flash("Uh oh, something went wrong. Please try again later.")
-			return redirect("/")
+			return redirect("/recovery")
 
 	elif method == "phone" and not carrier:
 		return render_template('phone.html',
@@ -141,7 +145,7 @@ def method_selection(recovery_id, method):
 			flash("This session has already been used to generate a " +\
 				  "phone recovery token. Please wait for the session to " +\
 				  "expire and try again or contact an RTP.")
-			return redirect("/")
+			return redirect("/recovery")
 
 		try:
 			phone_recovery(
@@ -155,7 +159,7 @@ def method_selection(recovery_id, method):
     			version = version)
 		except:
 			flash("Uh oh, something went wrong. Please try again later.")
-			return redirect("/")
+			return redirect("/recovery")
 
 
 @recovery_bp.route('/recovery/<recovery_id>/phone/verify', methods=['POST'])
@@ -170,7 +174,7 @@ def verify_phone(recovery_id):
 		return redirect("/reset?token=" + token)
 	else:
 		flash("Your verification code did not match, sorry!")
-		return redirect("/")
+		return redirect("/recovery")
 
 
 @recovery_bp.route('/reset', methods=['GET', 'POST'])
@@ -184,7 +188,7 @@ def reset_password():
 	or token_data.used:
 		flash("Oops! Invalid or expired reset token. Each token is only " +\
 			  "valid for 30 minutes after it is issued.")
-		return redirect("/")
+		return redirect("/recovery")
 
 	# Display the reset page.
 	if request.method == 'GET':
@@ -219,7 +223,7 @@ def reset_password():
 def admin():
 	if 'rtp' not in flask_session["userinfo"].get('groups'):
 		flash("Nice try. 😉")
-		return redirect("/")
+		return redirect("/recovery")
 
 	if request.method == "GET":
 		members  = get_members()

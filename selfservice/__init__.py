@@ -40,9 +40,11 @@ ldap = CSHLDAP(app.config['LDAP_BIND_DN'], app.config['LDAP_BIND_PW'])
 
 # Import blueprints
 from selfservice.blueprints.recovery import recovery_bp
+from selfservice.blueprints.change import change_bp
 
 # Register blueprints
 app.register_blueprint(recovery_bp)
+app.register_blueprint(change_bp)
 
 # Flask Routes
 
