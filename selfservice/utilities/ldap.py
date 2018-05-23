@@ -1,4 +1,5 @@
 from selfservice import app, ldap
+from ldap import SCOPE_SUBTREE
 import json
 import re
 
@@ -39,8 +40,18 @@ def verif_methods(username):
 	return methods
 
 def get_members():
-	members = ldap.get_group("member").get_members()
-	disp_mbr = []
-	for member in members:
-		disp_mbr.append({"display": member.displayName, "value": member.uid})
-	return disp_mbr
+	members = []
+	ldap_conn = ldap.get_con()
+	res = ldap_conn.search_s(
+        "cn=users,cn=accounts,dc=csh,dc=rit,dc=edu",
+        SCOPE_SUBTREE,
+        "(uid=*)",
+        ['uid', "displayName"])
+	for member in res:
+		print(member[1]["uid"])
+		members.append(
+			{"value": member[1]["uid"][0].decode("utf-8"), 
+			 "display": member[1].get("displayName", 
+			 	member[1]["uid"])[0].decode("utf-8")})
+
+	return members
