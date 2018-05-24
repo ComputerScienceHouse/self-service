@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Date, Boolean, func
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Binary, func
 from datetime import datetime, timedelta
 from selfservice import db
 
@@ -24,3 +24,9 @@ class PhoneVerification(db.Model):
 	__tablename__ = 'phone_codes'
 	code = Column(String(6), primary_key=True)
 	session = Column(String(36), ForeignKey('session.id'))
+
+class OTPSession(db.Model):
+	__tablename__ = "otp_session"
+	secret = Column(String(100), primary_key=True)
+	form = Column(Binary)
+	session = Column(Binary)

@@ -1,6 +1,8 @@
-from selfservice import app, ldap
+from python_freeipa.exceptions import NotFound
+from selfservice import app, ldap, ipa
 from ldap import SCOPE_SUBTREE
 import json
+import uuid
 import re
 
 def verif_methods(username):
@@ -55,3 +57,28 @@ def get_members():
 			 	member[1]["uid"])[0].decode("utf-8")})
 
 	return members
+
+
+def ipa_login():
+	username = app.config['LDAP_BIND_DN'].split(',')[0].split('=')[1]
+	password = app.config['LDAP_BIND_PW']
+	ipa.login(username, password)
+
+
+def create_ipa_otp(username, secret):
+	ipa_login()
+	data = {"ipatokenowner": username, "ipatokenotpkey": secret}
+	ipa._request('otptoken_add', params=data)
+
+def delete_ipa_otp(username):
+	ipa_login()
+	tokens = []
+	token_info = ipa._request(
+		'otptoken_find',
+		params={"ipatokenowner": username})
+	for token in token_info["result"]:
+		print(token['ipatokenuniqueid'][0])
+		ipa._request(
+			'otptoken_del',
+			args=[token['ipatokenuniqueid'][0]])
+

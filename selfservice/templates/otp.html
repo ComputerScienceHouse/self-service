@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block body %}
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning" role="alert">
+			 	{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+<div class="card mb-3">
+	<div class="card-body" style="text-align: left;">
+		<h3 class="card-title">Two Factor Settings</h3>
+		{% if not configured %}
+		<p class="card-text">
+			Make your CSH account more secure by adding a second factor of authentication. Please ready the Two Factor Wiki Article before continuing. 
+		</p>
+		<hr>
+		<p class="card-text">
+			Begin by scanning the QR Code below using a two factor application.
+		</p>
+		<img src="{{ qrcode(otp_uri) }}" class="otp-image">
+		<p class="card-text mt-3">
+			You can also <a href="{{otp_uri}}">click here</a> if you are on your phone or manually add the code to your application using the secret below.
+			<p class="otp-secret">{{secret}}</p>
+			Confirm your one time password below.
+		</p>
+		<form action="/otp?secret={{secret}}" method="post">
+			<input type="text" class="form-control mb-2" id="otp-code" name="otp-code" placeholder="One Time Password">
+
+			<div style="width: 100%; text-align: right;">
+				<button type="submit" class="btn btn-info mt-2">
+					Next <i class="fas fa-chevron-right"></i>
+				</button>
+			</div>
+		</form>
+		{% else %}
+		<p class="card-text mb-3">
+			You already have two-factor configured. If you would like to disable it, please click the button below.
+		</p>
+		<a href="/otp/remove" class="btn btn-danger" style="width:100%">
+			<i class="fas fa-minus-circle"></i> Remove Two Factor
+		</a>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}

@@ -19,6 +19,9 @@ OIDC_CLIENT_CONFIG = {
     'post_logout_redirect_uris': [os.environ.get('OIDC_LOGOUT_REDIRECT_URI',
                                                  'https://account.csh.rit.edu/logout')]
 }
+KC_ADMIN_USER = os.environ.get('KC_ADMIN_USER', "selfservice")
+KC_ADMIN_PW = os.environ.get('KC_ADMIN_PW', "")
+
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     'DATABASE_URI',
     'sqlite:///{}'.format(os.path.join(os.getcwd(), 'data.db')))
