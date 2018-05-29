@@ -112,7 +112,8 @@ a > .card:hover {
 }
 
 .otp-image {
-  width: 200px;
+  width: 90%;
+  max-width: 200px;
   margin: 0 auto;
   display: block;
 }
