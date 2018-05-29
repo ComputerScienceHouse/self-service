@@ -50,7 +50,6 @@ def get_members():
         "(uid=*)",
         ['uid', "displayName"])
 	for member in res:
-		print(member[1]["uid"])
 		members.append(
 			{"value": member[1]["uid"][0].decode("utf-8"), 
 			 "display": member[1].get("displayName", 
@@ -77,7 +76,6 @@ def delete_ipa_otp(username):
 		'otptoken_find',
 		params={"ipatokenowner": username})
 	for token in token_info["result"]:
-		print(token['ipatokenuniqueid'][0])
 		ipa._request(
 			'otptoken_del',
 			args=[token['ipatokenuniqueid'][0]])
