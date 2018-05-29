@@ -21,12 +21,16 @@ else:
     app.config.from_pyfile(os.path.join(os.getcwd(), "config.env.py"))
 
 # Get Git Revision
-version = subprocess.check_output(
-	['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').rstrip()
+version = (
+    subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
+    .decode("utf-8")
+    .rstrip()
+)
 
 # Create the database session and import models.
 db = SQLAlchemy(app)
 from selfservice.models import *
+
 migrate = Migrate(app, db)
 
 # Create recaptcha object
@@ -35,21 +39,20 @@ recaptcha.init_app(app)
 
 # OIDC Initialization
 auth = OIDCAuthentication(
-	app,
-	issuer=app.config["OIDC_ISSUER"],
-	client_registration_info=app.config["OIDC_CLIENT_CONFIG"])
+    app,
+    issuer=app.config["OIDC_ISSUER"],
+    client_registration_info=app.config["OIDC_CLIENT_CONFIG"],
+)
 
 # Connect to LDAP
-ldap = CSHLDAP(app.config['LDAP_BIND_DN'], app.config['LDAP_BIND_PW'])
+ldap = CSHLDAP(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
 
 # FreeIPA API Connection
-ipa = Client('stone.csh.rit.edu', version='2.215')
+ipa = Client("stone.csh.rit.edu", version="2.215")
 
 # Configure rate limiting
 limiter = Limiter(
-    app,
-    key_func=get_remote_address,
-    default_limits=["50 per day", "10 per hour"]
+    app, key_func=get_remote_address, default_limits=["50 per day", "10 per hour"]
 )
 
 # Initialize QR Code Generator
@@ -67,12 +70,7 @@ app.register_blueprint(otp_bp)
 
 # Flask Routes
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    return render_template('index.html',
-    	version = version)
-
-	
-
-
-
+    return render_template("index.html", version=version)

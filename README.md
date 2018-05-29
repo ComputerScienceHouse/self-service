@@ -1,5 +1,8 @@
 # CSH Self Service Account Management
 
+[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
 ### Features
 * Account Recovery 
   * Based on information stored about the user, allow them to reset a potentially forgotten password.
