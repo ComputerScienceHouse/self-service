@@ -1,8 +1,14 @@
+"""
+Self-Service Account Management Utility
+Computer Science House
+Rochester Institute of Technology
+
+Author: Marc Billow
+"""
+
 import os
 import subprocess
-
 from csh_ldap import CSHLDAP
-
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_recaptcha import ReCaptcha
@@ -27,10 +33,9 @@ version = (
     .rstrip()
 )
 
-# Create the database session and import models.
+# Create the database session.
 db = SQLAlchemy(app)
-from selfservice.models import *
-
+from selfservice.models import * #pylint: disable=wrong-import-position
 migrate = Migrate(app, db)
 
 # Create recaptcha object
@@ -59,9 +64,11 @@ limiter = Limiter(
 qr = QRcode(app)
 
 # Import blueprints
+#pylint: disable=wrong-import-position
 from selfservice.blueprints.recovery import recovery_bp
 from selfservice.blueprints.change import change_bp
 from selfservice.blueprints.otp import otp_bp
+#pylint: enable=wrong-import-position
 
 # Register blueprints
 app.register_blueprint(recovery_bp)
@@ -73,4 +80,7 @@ app.register_blueprint(otp_bp)
 
 @app.route("/")
 def index():
+    """
+    Renders the initial landing page.
+    """
     return render_template("index.html", version=version)

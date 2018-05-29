@@ -1,18 +1,27 @@
+"""
+General helper funtions that reduce copied code.
+"""
+
 import smtplib
 
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
-from email.headerregistry import Address
 from email.utils import formatdate
 
 
 def is_expired(timestamp, minutes):
+    """
+    Helper function to quickly check session expiry.
+    """
     exptime = datetime.utcnow() - timedelta(minutes=minutes)
     expired = bool(timestamp < exptime)
     return expired
 
 
 def email_recovery(username, address, token):
+    """
+    Send verification emails based on below template.
+    """
     message = (
         "Hey there!\n\n\tWe just received a request to reset "
         + "the Computer Science House account '{}'. According the information "
@@ -42,7 +51,9 @@ def email_recovery(username, address, token):
 
 
 def phone_recovery(phone, carrier, token):
-
+    """
+    Use SMS gateways below to send text verification code.
+    """
     carrier_relay = {
         "alltel": "@text.wireless.alltel.com",
         "att": "@txt.att.net",

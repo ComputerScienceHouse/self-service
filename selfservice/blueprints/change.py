@@ -1,12 +1,19 @@
+"""
+Flask blueprint for handling all password changes for users who know their
+current password.
+"""
+
 from flask import Blueprint, render_template, request, redirect, flash
 from selfservice.utilities.reset import passwd_change, PasswordChangeFailed
 from selfservice import version
 
 change_bp = Blueprint("change", __name__)
 
-
 @change_bp.route("/change", methods=["GET", "POST"])
 def change():
+    """
+    Renders the change password page and passes requests to FreeIPA.
+    """
     if request.method == "GET":
         return render_template("reset.html", version=version, changing=True)
 

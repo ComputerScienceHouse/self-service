@@ -1,9 +1,14 @@
+"""
+Flask blueprint for handling creating and removing OTP secrets from accounts.
+"""
+
 from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
+import dill as pickle
+import pyotp
 
 from selfservice.utilities.keycloak import (
     OTPConfigError,
-    generate_otp,
     create_kc_otp,
     confirm_kc_otp,
     OTPAlreadyConfigured,
@@ -13,15 +18,15 @@ from selfservice.utilities.ldap import create_ipa_otp, delete_ipa_otp
 from selfservice.models import OTPSession
 from selfservice import version, auth, db
 
-import dill as pickle
-import pyotp
-
 otp_bp = Blueprint("otp", __name__)
-
 
 @otp_bp.route("/otp", methods=["GET", "POST"])
 @auth.oidc_auth
 def enable():
+    """
+    Creates a Keycloak OTP secret and then displays that to the user. Once
+    the user has verified their token, it is then replicated in FreeIPA.
+    """
     username = flask_session["userinfo"].get("preferred_username")
     secret = request.args.get("secret", default="", type=str)
     otp_code = request.form.get("otp-code", default="")
@@ -61,10 +66,10 @@ def enable():
     form = pickle.loads(otp_session.form)
 
     try:
-        confirm_kc_otp(session, form, secret)
+        confirm_kc_otp(session, form)
     except OTPConfigError:
         flash("Invalid one time code provided or session expired.")
-        return redirect("/otp".format(secret))
+        return redirect("/otp")
 
     create_ipa_otp(username, secret)
     return render_template("otp.html", version=version, configured=True)
@@ -73,6 +78,10 @@ def enable():
 @otp_bp.route("/otp/remove", methods=["GET"])
 @auth.oidc_auth
 def disable():
+    """
+    Removes any tokens from both Keycloak and FreeIPA
+    """
+
     username = flask_session["userinfo"].get("preferred_username")
 
     try:

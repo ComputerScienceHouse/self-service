@@ -3,6 +3,7 @@ alembic==0.9.9
 appdirs==1.4.3
 asn1crypto==0.24.0
 aspy.yaml==1.1.1
+astroid==1.6.4
 attrs==18.1.0
 Beaker==1.9.1
 beautifulsoup4==4.6.0
@@ -31,11 +32,14 @@ gunicorn==19.8.1
 httmock==1.2.5
 identify==1.0.18
 idna==2.6
+isort==4.3.4
 itsdangerous==0.24
 Jinja2==2.10
+lazy-object-proxy==1.3.1
 limits==1.3
 Mako==1.0.7
 MarkupSafe==1.0
+mccabe==0.6.1
 nodeenv==1.3.0
 oic==0.11.0.1
 Pillow==5.1.0
@@ -46,6 +50,7 @@ pycparser==2.18
 pycrypto==2.6.1
 pycryptodomex==3.6.1
 pyjwkest==1.4.0
+pylint==1.9.1
 pyOpenSSL==18.0.0
 pyotp==2.2.6
 python-dateutil==2.7.3
@@ -64,3 +69,4 @@ toml==0.9.4
 urllib3==1.22
 virtualenv==16.0.0
 Werkzeug==0.14.1
+wrapt==1.10.11

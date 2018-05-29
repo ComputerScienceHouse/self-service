@@ -1,27 +1,47 @@
+"""
+Functions for interacting with the Keycloak service.
+"""
+
+import json
+
 from bs4 import BeautifulSoup
 from keycloak import KeycloakAdmin
-from selfservice import app
 import requests
 import pyotp
-import json
+
+from selfservice import app
 
 
 class OTPAlreadyConfigured(Exception):
+    """
+    Error for accounts who already have OTP configured.
+    """
     pass
 
 
 class OTPConfigError(Exception):
+    """
+    Error when unable to properly configure OTP.
+    """
     pass
 
 
 def generate_otp(secret):
+    """
+    Get current OTP for given secret.
+    """
     totp = pyotp.TOTP(secret)
     code = totp.now()
     return code
 
 
 def get_kc_cookies(username):
-    # Login as Keycloak Admin and Impersonate User
+    """
+    Login as Keycloak Admin and Impersonate User
+
+    Keyword arguments:
+    username -- Username of account to generate secret for
+    """
     admin = KeycloakAdmin(
         server_url="https://sso.csh.rit.edu/auth/",
         username=app.config["KC_ADMIN_USER"],
@@ -42,7 +62,12 @@ def get_kc_cookies(username):
 
 
 def create_kc_otp(username):
-    # Use session to generate a OTP Secret
+    """
+    Use session to generate a OTP Secret
+
+    Keyword arguments:
+    username -- Username of account to generate secret for
+    """
     session = requests.Session()
     session.cookies = get_kc_cookies(username)
     page = session.get(
@@ -67,8 +92,14 @@ def create_kc_otp(username):
     return (session, form_data, parsed_key)
 
 
-def confirm_kc_otp(session, form_data, parsed_key):
-    # Confirm the key.
+def confirm_kc_otp(session, form_data):
+    """
+    Confirm the key given by the user.
+
+    Keyword arguments:
+    session -- Session object with Keycloak cookies
+    form_data -- Form validation information
+    """
     save = session.post(
         "https://sso.csh.rit.edu/auth/realms/csh/account/totp", data=form_data
     )
@@ -78,6 +109,12 @@ def confirm_kc_otp(session, form_data, parsed_key):
 
 
 def delete_kc_otp(username):
+    """
+    Remove two-factor information from Keycloak account
+
+    Keyword arguments:
+    username -- Username of account to manipulate
+    """
     session = requests.Session()
     session.cookies = get_kc_cookies(username)
     page = session.get(
@@ -86,7 +123,7 @@ def delete_kc_otp(username):
     soup = BeautifulSoup(page.text, "html.parser")
     state_checker = soup.find("input", {"id": "stateChecker"}).get("value")
     form_data = {"stateChecker": state_checker, "submitAction": "Delete"}
-    delete = session.post(
+    session.post(
         "https://sso.csh.rit.edu/auth/realms/csh/account/totp", data=form_data
     )
     check = session.get(

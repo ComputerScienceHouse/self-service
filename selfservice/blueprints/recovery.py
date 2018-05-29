@@ -1,6 +1,10 @@
+"""
+Flask blueprint for handling identity verification and account recovery.
+"""
+
 import uuid
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
 
 from selfservice.utilities.general import is_expired, email_recovery, phone_recovery
@@ -20,6 +24,10 @@ recovery_bp = Blueprint("recovery", __name__)
 
 @recovery_bp.route("/recovery", methods=["GET", "POST"])
 def create_session():
+    """
+    Renders the password recovery form, handles the creation of a recovery
+    session, and redirect the user to their session.
+    """
 
     if request.method == "GET":
         return render_template("recovery.html", version=version)
@@ -62,6 +70,9 @@ def create_session():
 
 @recovery_bp.route("/recovery/<recovery_id>")
 def verify_identity(recovery_id):
+    """
+    Renders the identity verification options for the user.
+    """
 
     # Retrieve the session object.
     session = RecoverySession.query.filter_by(id=recovery_id).first()
@@ -97,6 +108,11 @@ def verify_identity(recovery_id):
 
 @recovery_bp.route("/recovery/<recovery_id>/<method>")
 def method_selection(recovery_id, method):
+    """
+    Depending on the selection made by the users, dispatch ID verification
+    message.
+    """
+
     # Parse expected URL paramters.
     index = request.args.get("index", default=0, type=int)
     carrier = request.args.get("carrier", default="", type=str)
@@ -172,6 +188,9 @@ def method_selection(recovery_id, method):
 
 @recovery_bp.route("/recovery/<recovery_id>/phone/verify", methods=["POST"])
 def verify_phone(recovery_id):
+    """
+    Check the provided verification code against our stored code.
+    """
     session = RecoverySession.query.filter_by(id=recovery_id).first()
     token = PhoneVerification.query.filter_by(session=recovery_id).first()
 
@@ -187,6 +206,10 @@ def verify_phone(recovery_id):
 
 @recovery_bp.route("/reset", methods=["GET", "POST"])
 def reset_password():
+    """
+    Renders the password reset page and forwards requests to FreeIPA.
+    """
+
     token = request.args.get("token", default="", type=str)
 
     token_data = ResetToken.query.filter_by(token=token).first()
@@ -231,6 +254,9 @@ def reset_password():
 @recovery_bp.route("/admin", methods=["GET", "POST"])
 @auth.oidc_auth
 def admin():
+    """
+    Allow RTPs to create reset tokens for accounts.
+    """
     if "rtp" not in flask_session["userinfo"].get("groups"):
         flash("Nice try. 😉")
         return redirect("/recovery")
