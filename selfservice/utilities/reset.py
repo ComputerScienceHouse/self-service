@@ -110,6 +110,7 @@ def passwd_reset(username, password):
     l = ldap.initialize("ldaps://stone.csh.rit.edu")
     l.simple_bind_s(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
     l.modify_s(dn, [(ldap.MOD_REPLACE, "userPassword", [password.encode()])])
+    l.modify_s(dn, [(ldap.MOD_REPLACE, "nsaccountlock", ["false".encode()])])
 
     # FreeIPA automatically expires the password set through the previous
     # method, so we need to use their password change API to get past that.

@@ -53,7 +53,16 @@ def create_session():
             )
             return redirect("/recovery")
 
-            # Generate a random UUID for session object.
+        failed_dn = "cn=failed,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu"
+        if failed_dn in member.groups():
+            flash(
+                "According to our records you failed a freshman evaluation "
+                + "and lost access to your account. If this is incorrect, "
+                + "please contact rtp@csh.rit.edu."
+            )
+            return redirect("/recovery")
+
+        # Generate a random UUID for session object.
         session_id = str(uuid.uuid4())
 
         # Create the object in the database.
@@ -234,6 +243,9 @@ def reset_password():
         # Lets actually do the reset.
     if request.form["password"] == request.form["verify"]:
         if len(request.form["password"]) >= 12:
+            passwd_reset(
+                    username=token_data.username, password=request.form["password"]
+                )
             try:
                 passwd_reset(
                     username=token_data.username, password=request.form["password"]
