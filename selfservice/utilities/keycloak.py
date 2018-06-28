@@ -123,9 +123,7 @@ def delete_kc_otp(username):
     soup = BeautifulSoup(page.text, "html.parser")
     state_checker = soup.find("input", {"id": "stateChecker"}).get("value")
     form_data = {"stateChecker": state_checker, "submitAction": "Delete"}
-    session.post(
-        "https://sso.csh.rit.edu/auth/realms/csh/account/totp", data=form_data
-    )
+    session.post("https://sso.csh.rit.edu/auth/realms/csh/account/totp", data=form_data)
     check = session.get(
         "https://sso.csh.rit.edu/auth/realms/csh/account/totp?mode=manual"
     )

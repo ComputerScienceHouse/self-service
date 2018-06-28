@@ -20,6 +20,7 @@ from selfservice import version, auth, db
 
 otp_bp = Blueprint("otp", __name__)
 
+
 @otp_bp.route("/otp", methods=["GET", "POST"])
 @auth.oidc_auth
 def enable():

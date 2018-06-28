@@ -7,6 +7,7 @@ import ldap as pyldap
 
 from selfservice import app, ldap, ipa
 
+
 def verif_methods(username):
     """
     Check LDAP for information about the provided user which could be used

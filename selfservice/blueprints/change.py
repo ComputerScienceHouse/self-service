@@ -9,6 +9,7 @@ from selfservice import version
 
 change_bp = Blueprint("change", __name__)
 
+
 @change_bp.route("/change", methods=["GET", "POST"])
 def change():
     """

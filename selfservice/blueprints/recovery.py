@@ -244,8 +244,8 @@ def reset_password():
     if request.form["password"] == request.form["verify"]:
         if len(request.form["password"]) >= 12:
             passwd_reset(
-                    username=token_data.username, password=request.form["password"]
-                )
+                username=token_data.username, password=request.form["password"]
+            )
             try:
                 passwd_reset(
                     username=token_data.username, password=request.form["password"]
