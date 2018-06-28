@@ -35,7 +35,8 @@ version = (
 
 # Create the database session.
 db = SQLAlchemy(app)
-from selfservice.models import * #pylint: disable=wrong-import-position
+from selfservice.models import *  # pylint: disable=wrong-import-position
+
 migrate = Migrate(app, db)
 
 # Create recaptcha object
@@ -64,11 +65,12 @@ limiter = Limiter(
 qr = QRcode(app)
 
 # Import blueprints
-#pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-position
 from selfservice.blueprints.recovery import recovery_bp
 from selfservice.blueprints.change import change_bp
 from selfservice.blueprints.otp import otp_bp
-#pylint: enable=wrong-import-position
+
+# pylint: enable=wrong-import-position
 
 # Register blueprints
 app.register_blueprint(recovery_bp)
@@ -76,6 +78,11 @@ app.register_blueprint(change_bp)
 app.register_blueprint(otp_bp)
 
 # Flask Routes
+
+
+@app.errorhandler(500)
+def app_error(e):
+    return render_template("error.html"), 500
 
 
 @app.route("/")
