@@ -21,8 +21,8 @@ def verif_methods(username):
 
     if user.mail:
         for addr in user.__getattr__("mail", as_list=True):
-            if "rit.edu" not in addr:
-                name, domain = addr.split("@")
+            if "rit.edu" not in addr and "@" in addr:
+                name, domain = addr.strip().split("@")
                 display = name[:1] + "..." + name[-1:] + "@" + domain
                 methods["email"].append({"data": addr, "display": display})
 
