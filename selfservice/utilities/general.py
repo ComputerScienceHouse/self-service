@@ -13,6 +13,10 @@ def is_expired(timestamp, minutes):
     """
     Helper function to quickly check session expiry.
     """
+
+    if not timestamp:
+        return None
+
     exptime = datetime.utcnow() - timedelta(minutes=minutes)
     expired = bool(timestamp < exptime)
     return expired

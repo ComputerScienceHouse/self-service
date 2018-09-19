@@ -275,17 +275,30 @@ def admin():
 
     if request.method == "GET":
         members = get_members()
+        uid = str(flask_session["userinfo"].get("preferred_username", ""))
 
-        return render_template("admin.html", version=version, members=members)
+        last_sessions = [{
+            "username": s.username,
+            "session_created": s.session_created,
+            "session_expired": ((is_expired(s.session_created, 10) and not s.token_created) or is_expired(s.token_created, 30)),
+            "token_created": s.token_created,
+            "used": s.used} for s in RecoverySession.query.outerjoin(
+                ResetToken, RecoverySession.id == ResetToken.session).with_entities(
+                RecoverySession.username,
+                RecoverySession.created.label("session_created"),
+                ResetToken.created.label("token_created"),
+                ResetToken.used).order_by(RecoverySession.created.desc()).limit(20).all()]
+
+        return render_template("admin.html", version=version, members=members, username=uid, sessions=last_sessions)
 
         # Generate a random UUID for session object.
     session_id = str(uuid.uuid4())
 
     # Create the object in the database.
-    session = RecoverySession(id=session_id, username=request.form["username"])
-    db.session.add(session)
+    session_data = RecoverySession(id=session_id, username=request.form["username"])
+    db.session.add(session_data)
     db.session.commit()
 
-    token = generate_token(session)
+    token = generate_token(session_data)
 
     return render_template("admin.html", version=version, token=token)

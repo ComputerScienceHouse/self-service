@@ -57,9 +57,10 @@ ldap = CSHLDAP(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
 ipa = Client("stone.csh.rit.edu", version="2.215")
 
 # Configure rate limiting
-limiter = Limiter(
-    app, key_func=get_remote_address, default_limits=["50 per day", "10 per hour"]
-)
+if not app.config["DEBUG"]:
+    limiter = Limiter(
+        app, key_func=get_remote_address, default_limits=["50 per day", "10 per hour"]
+    )
 
 # Initialize QR Code Generator
 qr = QRcode(app)

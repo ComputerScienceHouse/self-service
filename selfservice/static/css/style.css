@@ -12,6 +12,16 @@ body {
   margin: 0;
 }
 
+.table td, .table th {
+  vertical-align: middle;
+  text-align: center;
+  padding: .75rem 0.5rem;
+}
+
+.table td:first-child, .table th:first-child {
+  text-align: left;
+}
+
 .option > a,
 .option > a:visited,
 .option > a:hover {
@@ -36,7 +46,7 @@ footer {
   height: 100%;
 }
 
-.container {
+.ss-container {
     max-width: 500px !important;
     text-align: center;
 }
@@ -130,4 +140,9 @@ a > .card:hover {
   text-align: center;
   padding-top: .25em;
   padding-bottom: .1em;
+}
+
+.expired-user-img {
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
 }

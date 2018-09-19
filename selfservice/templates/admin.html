@@ -1,30 +1,120 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+{% block head %}
+<head>
+	{% include "include/head.html" %}
+	<style>
+		body {
+		    background-color: #eee;
+		    background-image: none;
+		}
+	</style>
+</head>
+{% endblock %}
 {% block body %}
-<div class="card mb-3">
-	<div class="card-body">
-		<h3 class="card-title mb-3">Administration</h3>
-		{% if not token %}
-		<p class="card-text mb-4">
-			Search for a user below to generate a temporary password reset token.
-		</p>
-		<form action="/admin" method="post">
-			<input type="text" class="form-control mb-2" id="username" name="username" placeholder="Username">
-			<div style="width: 100%; text-align: right;">
-				<button type="submit" class="btn btn-success mt-2">
-					Submit <i class="fas fa-check"></i>
-				</button>
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary justify-content-center">
+  <div class="container">
+    <a class="navbar-brand" href="#">Account Admin</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#nav-responsive">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- Responsive Collapse -->
+    <div class="collapse navbar-collapse" id="nav-responsive">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item my-auto">
+          <a class="nav-link" href="/">Back to Self-Service</a>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav ml-auto">
+        <!-- Dropdown -->
+        <li class="nav-item navbar-user dropdown" >
+          <a class="nav-link mt-2" href="#">
+            <img src="https://profiles.csh.rit.edu/image/{{username}}"> {{username}}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="margin-top: 6rem">
+	<div class="row">
+		<div class="col-lg-6 col-md-12">
+			<div class="card mb-3">
+				<div class="card-body">
+					<h3 class="card-title mb-3">Create Reset Token</h3>
+					{% if not token %}
+					<p class="card-text mb-4">
+						Search for a user below to generate a temporary password reset token.
+					</p>
+					<form action="/admin" method="post">
+						<input type="text" class="form-control mb-2" id="username" name="username" placeholder="Username">
+						<div style="width: 100%; text-align: right;">
+							<button type="submit" class="btn btn-success mt-2">
+								Submit <i class="fas fa-check"></i>
+							</button>
+						</div>
+					</form>
+					{% else %}
+					<p class="card-text mb-4">
+						Please provide the users with the link below!
+					</p>
+					<p class="card-text mb-4">
+						<a href="https://account.csh.rit.edu/reset?token={{token}}">
+							https://account.csh.rit.edu/reset?token={{token}}
+						</a>
+					</p>
+					{% endif %}
+				</div>
 			</div>
-		</form>
-		{% else %}
-		<p class="card-text mb-4">
-			Please provide the users with the link below!
-		</p>
-		<p class="card-text mb-4">
-			<a href="https://account.csh.rit.edu/reset?token={{token}}">
-				https://account.csh.rit.edu/reset?token={{token}}
-			</a>
-		</p>
-		{% endif %}
+		</div>
+
+		<div class="col-lg-6 col-md-12">
+			<div class="card mb-3">
+				<div class="card-body">
+					<h3 class="card-title mb-3">Latest Sessions</h3>
+					<table class="table">
+						<thead class="thead-light" style="text-align: center">
+							<tr>
+								<th scope="col" style="text-align: left">Username</th>
+								<th scope="col">Started</th>
+								<th scope="col">Tkn Gen</th>
+								<th scope="col">Key Used</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for session in sessions %}
+							{% if session["used"] or session["session_expired"] %}
+							<tr class="table-dark">
+							{% elif session["token_created"] %}
+							<tr class="table-success">
+							{% else %}
+							<tr class="table-warning">
+							{% endif %}
+								<th scope="row" class="border-top-0">
+									<div class="navbar-user {% if session["used"] or session["session_expired"] %}expired-user-img{% endif %}">
+										<img src="https://profiles.csh.rit.edu/image/{{session["username"]}}">{{session["username"]}}</th>
+									</div>
+								<td class="border-top-0">
+									{{session["session_created"].strftime('%m/%d %H:%M')}}
+								</td>
+								<td class="border-top-0">
+									{% if session["token_created"] %}
+									{{session["token_created"].strftime('%H:%M')}}
+									{% endif %}
+								</td>
+								<td class="border-top-0">
+									{% if session["used"] %}
+									✓
+									{% endif %}
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -46,3 +136,4 @@
 </script>
 {% endif %}
 {% endblock %}
+</html>
