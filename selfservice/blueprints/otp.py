@@ -75,6 +75,11 @@ def enable():
 
     create_ipa_otp(username, secret)
     app_passwd = set_app_passwd(username)
+
+    # Clean up used session data
+    OTPSession.query.filter_by(secret=secret).delete()
+    db.session.commit()
+
     return render_template("otp.html", version=version, configured=True, passwd=app_passwd)
 
 
