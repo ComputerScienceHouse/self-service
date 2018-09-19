@@ -60,3 +60,14 @@ class OTPSession(db.Model):
     secret = Column(String(100), primary_key=True)
     form = Column(Binary)
     session = Column(Binary)
+
+
+class AppSpecificPassword(db.Model):
+    """
+    Allows users to authenticate to applications that don't support two factor
+    auth. Currently: this is only mail
+    """
+    __tablename__ = "app_passwds"
+    user = Column(String, primary_key=True)
+    password = Column(String)
+

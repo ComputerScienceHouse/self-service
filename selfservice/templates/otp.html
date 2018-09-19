@@ -35,6 +35,22 @@
 				</button>
 			</div>
 		</form>
+		{% elif passwd %}
+		<p class="card-text mt-3">
+			Congratulations, you have successfully configured your OTP token.
+		</p>
+		<div class="alert alert-warning" role="alert">
+			<strong>Keep this stored in a safe place!</strong> It can't be recovered after you leave this page.
+		</div>
+		<p class="card-text mt-3">
+			In order for you to use services like mail that don't support two-factor, we have generated you a
+			random password that you will need to use to access those services.
+			
+		</p>
+		<p class="otp-secret">{{passwd}}</p>
+		<a href="/otp" class="btn btn-info" style="width:100%">
+			<i class="fas fa-check"></i> Okay, I saved it!
+		</a>
 		{% else %}
 		<p class="card-text mb-3">
 			You already have two-factor configured. If you would like to disable it, please click the button below.

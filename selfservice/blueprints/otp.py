@@ -15,6 +15,7 @@ from selfservice.utilities.keycloak import (
     delete_kc_otp,
 )
 from selfservice.utilities.ldap import create_ipa_otp, delete_ipa_otp
+from selfservice.utilities.app_passwd import set_app_passwd, delete_app_passwd
 from selfservice.models import OTPSession
 from selfservice import version, auth, db
 
@@ -73,7 +74,8 @@ def enable():
         return redirect("/otp")
 
     create_ipa_otp(username, secret)
-    return render_template("otp.html", version=version, configured=True)
+    app_passwd = set_app_passwd(username)
+    return render_template("otp.html", version=version, configured=True, passwd=app_passwd)
 
 
 @otp_bp.route("/otp/remove", methods=["GET"])
@@ -88,6 +90,7 @@ def disable():
     try:
         delete_kc_otp(username)
         delete_ipa_otp(username)
+        delete_app_passwd(username)
     except OTPConfigError:
         flash("Error removing two-factor! Please contact and RTP.")
         return redirect("/otp")
