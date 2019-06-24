@@ -61,7 +61,7 @@ python-freeipa==0.2.0
 python-jose==1.4.0
 python-keycloak==0.12.0
 python-ldap==3.0.0
-PyYAML==3.12
+PyYAML==5.1
 qrcode==6.0
 requests==2.18.4
 six==1.11.0
