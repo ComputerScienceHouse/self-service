@@ -13,6 +13,10 @@ LDAP_BIND_DN = os.environ.get(
 )
 LDAP_BIND_PW = os.environ.get("LDAP_BIND_PW", "")
 
+# Sentry config
+# Do not set the DSN for local development
+SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
+
 # OpenID Connect SSO config
 OIDC_ISSUER = os.environ.get("OIDC_ISSUER", "https://sso.csh.rit.edu/auth/realms/csh")
 OIDC_CLIENT_CONFIG = {

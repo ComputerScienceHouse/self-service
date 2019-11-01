@@ -19,6 +19,10 @@ from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from flask_qrcode import QRcode
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
 app = Flask(__name__)
 
 if os.path.exists(os.path.join(os.getcwd(), "config.py")):
@@ -31,6 +35,12 @@ version = (
     subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
     .decode("utf-8")
     .rstrip()
+)
+
+# Setup Sentry tracking
+sentry_sdk.init(
+    dsn=app.config['SENTRY_DSN'],
+    integrations=[FlaskIntegration(), SqlalchemyIntegration()]
 )
 
 # Create the database session.
