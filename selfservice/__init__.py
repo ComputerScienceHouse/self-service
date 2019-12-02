@@ -8,6 +8,7 @@ Author: Marc Billow
 
 import os
 import subprocess
+import srvlookup
 from csh_ldap import CSHLDAP
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
@@ -63,8 +64,12 @@ auth = OIDCAuthentication(
 # Connect to LDAP
 ldap = CSHLDAP(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
 
+# Find FreeIPA server
+ldap_srvs = srvlookup.lookup("ldap", "tcp", "csh.rit.edu")
+ldap_uri = ldap_srvs[0].host
+
 # FreeIPA API Connection
-ipa = Client("stone.csh.rit.edu", version="2.215")
+ipa = Client(ldap_uri, version="2.215")
 
 # Configure rate limiting
 if not app.config["DEBUG"]:
