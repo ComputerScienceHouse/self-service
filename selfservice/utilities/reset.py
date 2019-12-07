@@ -110,7 +110,7 @@ def passwd_reset(username, password):
 
     # Find FreeIPA server
     ldap_srvs = srvlookup.lookup("ldap", "tcp", "csh.rit.edu")
-    ldap_uri = ldap_srvs[0].host
+    ldap_uri = ldap_srvs[0].hostname
     l = ldap.initialize("ldaps://{}".format(ldap_uri))
     l.simple_bind_s(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
     l.modify_s(dn, [(ldap.MOD_REPLACE, "userPassword", [password.encode()])])
@@ -135,7 +135,7 @@ def passwd_change(username, old_pw, new_pw):
     """
     # Find FreeIPA server
     ldap_srvs = srvlookup.lookup("ldap", "tcp", "csh.rit.edu")
-    ldap_uri = ldap_srvs[0].host
+    ldap_uri = ldap_srvs[0].hostname
     change = requests.post(
         "https://{}/ipa/session/change_password".format(ldap_uri),
         data={"user": username, "old_password": old_pw, "new_password": new_pw},
