@@ -66,7 +66,7 @@ ldap = CSHLDAP(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
 
 # Find FreeIPA server
 ldap_srvs = srvlookup.lookup("ldap", "tcp", "csh.rit.edu")
-ldap_uri = ldap_srvs[0].host
+ldap_uri = ldap_srvs[0].hostname
 
 # FreeIPA API Connection
 ipa = Client(ldap_uri, version="2.215")
