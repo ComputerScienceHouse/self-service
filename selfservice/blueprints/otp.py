@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
 import dill as pickle
 import pyotp
+import logging
 
 from selfservice.utilities.keycloak import (
     OTPConfigError,
@@ -17,13 +18,15 @@ from selfservice.utilities.keycloak import (
 from selfservice.utilities.ldap import create_ipa_otp, delete_ipa_otp
 from selfservice.utilities.app_passwd import set_app_passwd, delete_app_passwd
 from selfservice.models import OTPSession
-from selfservice import version, auth, db
+from selfservice import version, auth, db, OIDC_PROVIDER
 
 otp_bp = Blueprint("otp", __name__)
 
+LOG = logging.getLogger(__name__)
+
 
 @otp_bp.route("/otp", methods=["GET", "POST"])
-@auth.oidc_auth
+@auth.oidc_auth(OIDC_PROVIDER)
 def enable():
     """
     Creates a Keycloak OTP secret and then displays that to the user. Once
@@ -84,7 +87,7 @@ def enable():
 
 
 @otp_bp.route("/otp/remove", methods=["GET"])
-@auth.oidc_auth
+@auth.oidc_auth(OIDC_PROVIDER)
 def disable():
     """
     Removes any tokens from both Keycloak and FreeIPA
@@ -98,6 +101,7 @@ def disable():
         delete_app_passwd(username)
     except OTPConfigError:
         flash("Error removing two-factor! Please contact and RTP.")
+        LOG.exception("Failed to remove OTP for %s", username)
         return redirect("/otp")
 
     return redirect("/otp")

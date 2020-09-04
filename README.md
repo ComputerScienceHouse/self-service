@@ -15,7 +15,28 @@
 
 ### Recovery Techniques
 * SMS Number
-  * Uses common carrier email to SMS bridges to send temporary verification pin. Once verified the user is redirected to the reset page.
+  * Uses Twilio to send temporary verification pin. Once verified the user is redirected to the reset page.
 * External Email
   * Emails a direct link to the reset page.
+  
+## Development Environment
+
+1. Bring up dependencies:
+   1. ```shell script
+      docker-compose up -d
+      ```
  
+1. Copy configuration template and set necessary secrets:
+   1. ```shell script
+      cp ./config.env.py ./config.py
+      ```
+      
+1. Run migrations:
+   1. ```shell script
+      flask db migrate
+      ```
+      
+1. Run the application:
+   1. ```shell script
+      FLASK_ENV=development python ./wsgi.py
+      ```

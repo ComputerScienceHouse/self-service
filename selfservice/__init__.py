@@ -12,6 +12,7 @@ import srvlookup
 from csh_ldap import CSHLDAP
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
+from flask_pyoidc.provider_configuration import ProviderConfiguration, ClientMetadata
 from flask_recaptcha import ReCaptcha
 from flask_sqlalchemy import SQLAlchemy
 from python_freeipa import Client
@@ -23,6 +24,7 @@ from flask_qrcode import QRcode
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
 
 app = Flask(__name__)
 
@@ -55,10 +57,15 @@ recaptcha = ReCaptcha()
 recaptcha.init_app(app)
 
 # OIDC Initialization
-auth = OIDCAuthentication(
-    app,
+OIDC_PROVIDER = "csh"
+client_info = ClientMetadata(**app.config["OIDC_CLIENT_CONFIG"])
+provider = ProviderConfiguration(
     issuer=app.config["OIDC_ISSUER"],
-    client_registration_info=app.config["OIDC_CLIENT_CONFIG"],
+    client_metadata=client_info
+)
+auth = OIDCAuthentication(
+    app=app,
+    provider_configurations={OIDC_PROVIDER: provider}
 )
 
 # Connect to LDAP

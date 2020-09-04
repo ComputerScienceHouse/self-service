@@ -3,6 +3,7 @@ Flask blueprint for handling identity verification and account recovery.
 """
 
 import uuid
+import logging
 
 from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
@@ -17,7 +18,9 @@ from selfservice.utilities.reset import (
 from selfservice.utilities.ldap import verif_methods, get_members
 
 from selfservice.models import RecoverySession, PhoneVerification, ResetToken
-from selfservice import db, auth, recaptcha, ldap, version
+from selfservice import db, auth, recaptcha, ldap, version, OIDC_PROVIDER
+
+LOG = logging.getLogger(__name__)
 
 recovery_bp = Blueprint("recovery", __name__)
 
@@ -102,7 +105,7 @@ def verify_identity(recovery_id):
         flash(
             "We weren't able to find any information attached to your account "
             + "which could be used to automatically recover it. Please email "
-            + "rtp@csh.rit.edu for futher assistance."
+            + "rtp@csh.rit.edu for further assistance."
         )
         return redirect("/recovery")
 
@@ -124,7 +127,6 @@ def method_selection(recovery_id, method):
 
     # Parse expected URL paramters.
     index = request.args.get("index", default=0, type=int)
-    carrier = request.args.get("carrier", default="", type=str)
 
     # Retrieve the session object.
     session = RecoverySession.query.filter_by(id=recovery_id).first()
@@ -157,18 +159,7 @@ def method_selection(recovery_id, method):
             flash("Uh oh, something went wrong. Please try again later.")
             return redirect("/recovery")
 
-    elif method == "phone" and not carrier:
-        return render_template(
-            "phone.html",
-            phone=methods["phone"][index]["display"][-4:],
-            recovery_id=session.id,
-            index=index,
-            username=session.username,
-            choose_carrier=True,
-            version=version,
-        )
-
-    elif method == "phone" and carrier:
+    elif method == "phone":
         try:
             token = generate_pin(session)
         except TokenAlreadyExists:
@@ -181,16 +172,16 @@ def method_selection(recovery_id, method):
 
         try:
             phone_recovery(
-                phone=methods["phone"][index]["data"], carrier=carrier, token=token
+                phone=methods["phone"][index]["data"], token=token
             )
             return render_template(
                 "phone.html",
                 recovery_id=session.id,
                 username=session.username,
-                choose_carrier=False,
                 version=version,
             )
         except:
+            LOG.exception("Failed to send SMS to phone number!")
             flash("Uh oh, something went wrong. Please try again later.")
             return redirect("/recovery")
 
@@ -264,7 +255,7 @@ def reset_password():
 
 
 @recovery_bp.route("/admin", methods=["GET", "POST"])
-@auth.oidc_auth
+@auth.oidc_auth(OIDC_PROVIDER)
 def admin():
     """
     Allow RTPs to create reset tokens for accounts.
