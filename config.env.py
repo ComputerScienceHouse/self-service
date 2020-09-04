@@ -41,3 +41,8 @@ RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "")
 RECAPTCHA_THEME = "light"
 RECAPTCHA_TYPE = "image"
 RECAPTCHA_SIZE = "normal"
+
+TWILIO_SID = os.environ.get("TWILIO_SID", "")
+TWILIO_TOKEN = os.environ.get("TWILIO_TOKEN", "")
+TWILIO_NUMBER = os.environ.get("TWILIO_NUMBER", "")
+TWILIO_SERVICE_SID = os.environ.get("TWILIO_SERVICE_SID", "")

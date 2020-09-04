@@ -7,6 +7,8 @@ import smtplib
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.utils import formatdate
+from twilio.rest import Client
+from flask import current_app
 
 
 def is_expired(timestamp, minutes):
@@ -54,33 +56,22 @@ def email_recovery(username, address, token):
     server.quit()
 
 
-def phone_recovery(phone, carrier, token):
+def phone_recovery(phone, token):
     """
-    Use SMS gateways below to send text verification code.
+    Use Twilio to send token.
     """
-    carrier_relay = {
-        "alltel": "@text.wireless.alltel.com",
-        "att": "@txt.att.net",
-        "boost": "@myboostmobile.com",
-        "cricket": "@sms.mycricket.com",
-        "sprint": "@messaging.sprintpcs.com",
-        "tmobile": "@tmomail.net",
-        "us": "@email.uscc.net",
-        "verizon": "@vtext.com",
-        "virgin": "@vmobl.com",
-    }
+    from_number = current_app.config.get("TWILIO_NUMBER")
+    service_sid = current_app.config.get("TWILIO_SERVICE_SID")
+    client = Client(
+        current_app.config.get("TWILIO_SID"),
+        current_app.config.get("TWILIO_TOKEN")
+    )
 
-    address = phone + carrier_relay[carrier]
+    body = f"Your CSH account recovery PIN is: {token}"
 
-    message = "Your CSH account recovery PIN is: {}"
-
-    message = message.format(token)
-
-    email = MIMEText(message)
-    email["To"] = address
-    email["From"] = "rtp@csh.rit.edu"
-    email["Date"] = formatdate()
-
-    server = smtplib.SMTP("mail.csh.rit.edu")
-    server.send_message(email)
-    server.quit()
+    client.messages.create(
+        to=phone,
+        from_=from_number,
+        body=body,
+        messaging_service_sid=service_sid
+    )
