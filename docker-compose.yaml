@@ -1,0 +1,25 @@
+version: '2'
+services:
+    postgres:
+        image: postgres:9.6
+        container_name: selfservice-postgres
+        restart: always
+        volumes:
+            - ./.docker/postgres/:/var/lib/postgresql/data
+        environment:
+            POSTGRES_PASSWORD: supersecretpassword
+            POSTGRES_USER: selfservice
+        ports:
+            - 127.0.0.1:5433:5432
+    phppgadmin:
+        image: bitnami/phppgadmin:latest
+        container_name: selfservice-pgadmin
+        links:
+            - postgres
+        environment:
+            DATABASE_HOST: postgres
+            DATABASE_PORT_NUMBER: 5432
+        restart: always
+        ports:
+            - 127.0.0.1:8081:8080
+            - 127.0.0.1:8444:8443

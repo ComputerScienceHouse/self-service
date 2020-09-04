@@ -30,7 +30,8 @@ KC_ADMIN_USER = os.environ.get("KC_ADMIN_USER", "selfservice")
 KC_ADMIN_PW = os.environ.get("KC_ADMIN_PW", "")
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    "DATABASE_URI", "sqlite:///{}".format(os.path.join(os.getcwd(), "data.db"))
+    "DATABASE_URI",
+    "postgresql://selfservice:supersecretpassword@localhost:5433/selfservice"
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
