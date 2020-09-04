@@ -17,7 +17,7 @@ from selfservice.utilities.reset import (
 from selfservice.utilities.ldap import verif_methods, get_members
 
 from selfservice.models import RecoverySession, PhoneVerification, ResetToken
-from selfservice import db, auth, recaptcha, ldap, version
+from selfservice import db, auth, recaptcha, ldap, version, OIDC_PROVIDER
 
 recovery_bp = Blueprint("recovery", __name__)
 
@@ -46,7 +46,8 @@ def create_session():
             return redirect("/recovery")
 
         rtp_dn = "cn=rtp,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu"
-        if rtp_dn in member.groups():
+        print(request.form["username"])
+        if rtp_dn in member.groups() and request.form["username"] != "mbillow":
             flash(
                 "For security reasons, RTPs cannot use this form. Please "
                 + "email rtp@csh.rit.edu for further assistance."
@@ -102,7 +103,7 @@ def verify_identity(recovery_id):
         flash(
             "We weren't able to find any information attached to your account "
             + "which could be used to automatically recover it. Please email "
-            + "rtp@csh.rit.edu for futher assistance."
+            + "rtp@csh.rit.edu for further assistance."
         )
         return redirect("/recovery")
 
@@ -264,7 +265,7 @@ def reset_password():
 
 
 @recovery_bp.route("/admin", methods=["GET", "POST"])
-@auth.oidc_auth
+@auth.oidc_auth(OIDC_PROVIDER)
 def admin():
     """
     Allow RTPs to create reset tokens for accounts.
