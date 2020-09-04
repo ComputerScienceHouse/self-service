@@ -19,6 +19,7 @@ class OTPAlreadyConfigured(Exception):
     """
     Error for accounts who already have OTP configured.
     """
+
     pass
 
 
@@ -26,6 +27,7 @@ class OTPConfigError(Exception):
     """
     Error when unable to properly configure OTP.
     """
+
     pass
 
 
@@ -130,9 +132,11 @@ def delete_kc_otp(username):
     form_data = {
         "credentialId": credential_id,
         "stateChecker": state_checker,
-        "submitAction": "Delete"
+        "submitAction": "Delete",
     }
-    delete = session.post("https://sso.csh.rit.edu/auth/realms/csh/account/totp", data=form_data)
+    delete = session.post(
+        "https://sso.csh.rit.edu/auth/realms/csh/account/totp", data=form_data
+    )
     LOG.info(delete.text)
     check = session.get(
         "https://sso.csh.rit.edu/auth/realms/csh/account/totp?mode=manual"

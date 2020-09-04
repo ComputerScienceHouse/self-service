@@ -18,6 +18,7 @@ class TokenAlreadyExists(Exception):
     Error generated when user had already used their session to generate
     a reset token.
     """
+
     pass
 
 
@@ -25,6 +26,7 @@ class PasswordChangeFailed(Exception):
     """
     Error raised when a failure occured during the reset process.
     """
+
     pass
 
 

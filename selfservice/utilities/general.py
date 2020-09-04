@@ -63,15 +63,11 @@ def phone_recovery(phone, token):
     from_number = current_app.config.get("TWILIO_NUMBER")
     service_sid = current_app.config.get("TWILIO_SERVICE_SID")
     client = Client(
-        current_app.config.get("TWILIO_SID"),
-        current_app.config.get("TWILIO_TOKEN")
+        current_app.config.get("TWILIO_SID"), current_app.config.get("TWILIO_TOKEN")
     )
 
     body = f"Your CSH account recovery PIN is: {token}"
 
     client.messages.create(
-        to=phone,
-        from_=from_number,
-        body=body,
-        messaging_service_sid=service_sid
+        to=phone, from_=from_number, body=body, messaging_service_sid=service_sid
     )

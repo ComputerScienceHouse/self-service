@@ -171,9 +171,7 @@ def method_selection(recovery_id, method):
             return redirect("/recovery")
 
         try:
-            phone_recovery(
-                phone=methods["phone"][index]["data"], token=token
-            )
+            phone_recovery(phone=methods["phone"][index]["data"], token=token)
             return render_template(
                 "phone.html",
                 recovery_id=session.id,
@@ -279,16 +277,36 @@ def admin():
 
     members = get_members()
     uid = str(flask_session["userinfo"].get("preferred_username", ""))
-    last_sessions = [{
-        "username": s.username,
-        "session_created": s.session_created,
-        "session_expired": ((is_expired(s.session_created, 10) and not s.token_created) or is_expired(s.token_created, 30)),
-        "token_created": s.token_created,
-        "used": s.used} for s in RecoverySession.query.outerjoin(
-            ResetToken, RecoverySession.id == ResetToken.session).with_entities(
+    last_sessions = [
+        {
+            "username": s.username,
+            "session_created": s.session_created,
+            "session_expired": (
+                (is_expired(s.session_created, 10) and not s.token_created)
+                or is_expired(s.token_created, 30)
+            ),
+            "token_created": s.token_created,
+            "used": s.used,
+        }
+        for s in RecoverySession.query.outerjoin(
+            ResetToken, RecoverySession.id == ResetToken.session
+        )
+        .with_entities(
             RecoverySession.username,
             RecoverySession.created.label("session_created"),
             ResetToken.created.label("token_created"),
-            ResetToken.used).order_by(RecoverySession.created.desc()).limit(20).all()]
+            ResetToken.used,
+        )
+        .order_by(RecoverySession.created.desc())
+        .limit(20)
+        .all()
+    ]
 
-    return render_template("admin.html", version=version, members=members, username=uid, sessions=last_sessions, token=token)
+    return render_template(
+        "admin.html",
+        version=version,
+        members=members,
+        username=uid,
+        sessions=last_sessions,
+        token=token,
+    )

@@ -42,8 +42,8 @@ version = (
 
 # Setup Sentry tracking
 sentry_sdk.init(
-    dsn=app.config['SENTRY_DSN'],
-    integrations=[FlaskIntegration(), SqlalchemyIntegration()]
+    dsn=app.config["SENTRY_DSN"],
+    integrations=[FlaskIntegration(), SqlalchemyIntegration()],
 )
 
 # Create the database session.
@@ -60,13 +60,9 @@ recaptcha.init_app(app)
 OIDC_PROVIDER = "csh"
 client_info = ClientMetadata(**app.config["OIDC_CLIENT_CONFIG"])
 provider = ProviderConfiguration(
-    issuer=app.config["OIDC_ISSUER"],
-    client_metadata=client_info
+    issuer=app.config["OIDC_ISSUER"], client_metadata=client_info
 )
-auth = OIDCAuthentication(
-    app=app,
-    provider_configurations={OIDC_PROVIDER: provider}
-)
+auth = OIDCAuthentication(app=app, provider_configurations={OIDC_PROVIDER: provider})
 
 # Connect to LDAP
 ldap = CSHLDAP(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])

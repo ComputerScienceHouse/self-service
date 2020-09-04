@@ -83,7 +83,9 @@ def enable():
     OTPSession.query.filter_by(secret=secret).delete()
     db.session.commit()
 
-    return render_template("otp.html", version=version, configured=True, passwd=app_passwd)
+    return render_template(
+        "otp.html", version=version, configured=True, passwd=app_passwd
+    )
 
 
 @otp_bp.route("/otp/remove", methods=["GET"])
