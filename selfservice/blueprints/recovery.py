@@ -49,8 +49,7 @@ def create_session():
             return redirect("/recovery")
 
         rtp_dn = "cn=rtp,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu"
-        print(request.form["username"])
-        if rtp_dn in member.groups() and request.form["username"] != "mbillow":
+        if rtp_dn in member.groups():
             flash(
                 "For security reasons, RTPs cannot use this form. Please "
                 + "email rtp@csh.rit.edu for further assistance."
