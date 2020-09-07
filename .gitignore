@@ -103,3 +103,7 @@ ENV/
 # Configurations
 config.py
 data.db
+.docker/
+.idea/
+
+
