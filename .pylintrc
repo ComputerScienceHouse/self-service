@@ -67,6 +67,7 @@ disable=
     inconsistent-return-statements,
     no-name-in-module,
     cyclic-import,
+    unnecessary-pass,
 
 
 [REPORTS]
