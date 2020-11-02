@@ -70,7 +70,7 @@ python-editor==1.0.3
 python-freeipa==1.0.6
 python-jose==1.4.0
 python-keycloak==0.22.0
-python-ldap==3.0.0
+python-ldap==3.3.1
 pytz==2020.1
 PyYAML==5.3.1
 qrcode==6.1
