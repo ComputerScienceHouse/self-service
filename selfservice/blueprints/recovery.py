@@ -75,9 +75,8 @@ def create_session():
 
         # Redirect the user to thier session.
         return redirect("/recovery/" + session_id)
-    else:
-        flash("Please complete the reCaptcha.")
-        return redirect("/recovery")
+    flash("Please complete the reCaptcha.")
+    return redirect("/recovery")
 
 
 @recovery_bp.route("/recovery/<recovery_id>")
@@ -197,9 +196,8 @@ def verify_phone(recovery_id):
         if not token:
             token = generate_token(session)
         return redirect("/reset?token=" + token)
-    else:
-        flash("Your verification code did not match, sorry!")
-        return redirect("/recovery")
+    flash("Your verification code did not match, sorry!")
+    return redirect("/recovery")
 
 
 @recovery_bp.route("/reset", methods=["GET", "POST"])

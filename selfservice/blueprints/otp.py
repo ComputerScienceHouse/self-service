@@ -2,11 +2,13 @@
 Flask blueprint for handling creating and removing OTP secrets from accounts.
 """
 
+import logging
+import pyotp
+
 from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
 import dill as pickle
-import pyotp
-import logging
+
 
 from selfservice.utilities.keycloak import (
     OTPConfigError,
@@ -63,7 +65,7 @@ def enable():
     if not secret or not otp_session:
         flash("Invalid secret provided. Please try again.")
         return redirect("/otp")
-    elif not otp_code:
+    if not otp_code:
         flash("No one time password provided. Please scan the code and try again.")
         return redirect("/otp".format(secret))
 

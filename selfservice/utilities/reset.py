@@ -93,8 +93,7 @@ def valid_token(token_id):
         if is_expired(token_data.created, 30):
             return False
         return True
-    else:
-        return False
+    return False
 
 
 def passwd_reset(username, password):

@@ -101,7 +101,10 @@ app.register_blueprint(otp_bp)
 
 @app.errorhandler(500)
 def app_error(e):
-    return render_template("error.html"), 500
+    """
+    Renders an error page.
+    """
+    return render_template("error.html", e=e), 500
 
 
 @app.route("/")

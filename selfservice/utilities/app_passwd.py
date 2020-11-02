@@ -56,5 +56,11 @@ def set_app_passwd(username):
 
 
 def delete_app_passwd(username):
+    """
+    Deletes an existing App Specific Password
+
+    Keyword arguments:
+    username -- User who's app password will be deleted
+    """
     AppSpecificPassword.query.filter_by(user=username).delete()
     db.session.commit()
