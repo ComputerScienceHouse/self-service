@@ -32,7 +32,7 @@ Flask-pyoidc==3.5.1
 Flask-QRcode==3.0.0
 Flask-ReCaptcha==0.4.2
 Flask-SQLAlchemy==2.4.4
-future==0.16.0
+future==0.18.2
 gunicorn==19.8.1
 httmock==1.2.5
 identify==1.0.18
