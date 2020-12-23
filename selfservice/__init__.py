@@ -113,3 +113,12 @@ def index():
     Renders the initial landing page.
     """
     return render_template("index.html", version=version)
+
+
+@app.route("/health")
+@limiter.exempt
+def health():
+    """
+    Shows an ok status if the application is up and running
+    """
+    return {"status": "ok"}
