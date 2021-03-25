@@ -72,7 +72,7 @@ python-jose==1.4.0
 python-keycloak==0.22.0
 python-ldap~=3.0.0
 pytz==2020.1
-PyYAML==5.3.1
+PyYAML==5.4
 qrcode==6.1
 regex==2020.7.14
 requests==2.24.0
