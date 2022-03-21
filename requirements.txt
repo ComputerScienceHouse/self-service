@@ -16,7 +16,7 @@ cffi==1.13.2
 cfgv==1.0.0
 chardet==3.0.4
 click==7.1.2
-cryptography==3.2
+cryptography==36.0.2
 csh-ldap==2.3.1
 dataclasses==0.7
 defusedxml==0.6.0
