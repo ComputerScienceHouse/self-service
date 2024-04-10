@@ -257,7 +257,7 @@ def admin():
     Allow RTPs to create reset tokens for accounts.
     """
     if "rtp" not in flask_session["userinfo"].get("groups"):
-        flash("Nice try. 😉")
+        flash("Nice try. 😉 " + ', '.join(flask_session["userinfo"].get("groups")))
         return redirect("/recovery")
 
     if request.method == "GET":
