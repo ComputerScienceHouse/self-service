@@ -11,7 +11,7 @@ black==20.8b1
 blinker==1.4
 bs4==0.0.1
 cached-property==1.4.2
-certifi==2018.4.16
+certifi==2022.12.7
 cffi==1.13.2
 cfgv==1.0.0
 chardet==3.0.4
