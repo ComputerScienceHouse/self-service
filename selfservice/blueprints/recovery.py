@@ -18,7 +18,7 @@ from selfservice.utilities.reset import (
 from selfservice.utilities.ldap import verif_methods, get_members
 
 from selfservice.models import RecoverySession, PhoneVerification, ResetToken
-from selfservice import db, auth, recaptcha, ldap, version, OIDC_PROVIDER
+from selfservice import db, auth, xcaptcha, ldap, version, OIDC_PROVIDER
 
 LOG = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def create_session():
     if request.method == "GET":
         return render_template("recovery.html", version=version)
 
-    if recaptcha.verify():
+    if xcaptcha.verify():
 
         # If we can't find an account, flash error.
         try:

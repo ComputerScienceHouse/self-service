@@ -9,7 +9,7 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     Boolean,
-    Binary,
+    LargeBinary,
     func,
 )
 from selfservice import db
@@ -62,8 +62,8 @@ class OTPSession(db.Model):
 
     __tablename__ = "otp_session"
     secret = Column(String(100), primary_key=True)
-    form = Column(Binary)
-    session = Column(Binary)
+    form = Column(LargeBinary)
+    session = Column(LargeBinary)
 
 
 class AppSpecificPassword(db.Model):

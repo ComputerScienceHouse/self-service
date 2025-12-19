@@ -13,7 +13,7 @@ from csh_ldap import CSHLDAP
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_pyoidc.provider_configuration import ProviderConfiguration, ClientMetadata
-from flask_recaptcha import ReCaptcha
+from flask_xcaptcha import XCaptcha
 from flask_sqlalchemy import SQLAlchemy
 from python_freeipa import Client
 from flask_limiter import Limiter
@@ -52,9 +52,9 @@ from selfservice.models import *  # pylint: disable=wrong-import-position
 
 migrate = Migrate(app, db)
 
-# Create recaptcha object
-recaptcha = ReCaptcha()
-recaptcha.init_app(app)
+# Create xcaptcha object
+if app.config["XCAPTCHA_ENABLED"]:
+    xcaptcha = XCaptcha(app=app)
 
 # OIDC Initialization
 OIDC_PROVIDER = "csh"
@@ -77,7 +77,7 @@ ipa = Client(ldap_uri, version="2.215")
 # Configure rate limiting
 if not app.config["DEBUG"]:
     limiter = Limiter(
-        app, key_func=get_remote_address, default_limits=["50 per day", "10 per hour"]
+        get_remote_address, app=app, default_limits=["50 per day", "10 per hour"]
     )
 
 # Initialize QR Code Generator

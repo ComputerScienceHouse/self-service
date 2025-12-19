@@ -1,7 +1,7 @@
 version: '2'
 services:
     postgres:
-        image: postgres:9.6
+        image: docker.io/postgres:9.6
         container_name: selfservice-postgres
         restart: always
         volumes:
@@ -12,7 +12,7 @@ services:
         ports:
             - 127.0.0.1:5433:5432
     phppgadmin:
-        image: bitnami/phppgadmin:latest
+        image: docker.io/dockage/phppgadmin:latest
         container_name: selfservice-pgadmin
         links:
             - postgres
