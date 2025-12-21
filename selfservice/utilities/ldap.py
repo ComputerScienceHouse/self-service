@@ -92,6 +92,11 @@ def create_ipa_otp(username, secret):
     data = {"ipatokenowner": username, "ipatokenotpkey": secret}
     ipa._request("otptoken_add", params=data)
 
+def has_ipa_otp(username):
+    ipa_login()
+    token_info = ipa._request("otptoken_find", params={"ipatokenowner": username})
+    return len(token_info["result"]) > 0
+
 
 def delete_ipa_otp(username):
     """
