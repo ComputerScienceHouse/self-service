@@ -79,6 +79,8 @@ if not app.config["DEBUG"]:
     limiter = Limiter(
         get_remote_address, app=app, default_limits=["50 per day", "10 per hour"]
     )
+else:
+    limiter = Limiter(get_remote_address, app=app, default_limits=[])
 
 # Initialize QR Code Generator
 qr = QRcode(app)

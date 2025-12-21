@@ -20,7 +20,7 @@ from selfservice.utilities.keycloak import (
 )
 from selfservice.utilities.ldap import create_ipa_otp, has_ipa_otp, delete_ipa_otp
 from selfservice.utilities.app_passwd import set_app_passwd, delete_app_passwd
-from selfservice import version, auth, db, OIDC_PROVIDER
+from selfservice import version, auth, OIDC_PROVIDER
 
 otp_bp = Blueprint("otp", __name__)
 
@@ -44,7 +44,13 @@ def enable():
 
         # If its registered in one place but not the other
         if kc_registered != ipa_registered:
-            LOG.warn(f"{username} does not have TOTP in both Keycloak and LDAP (kc_registered={kc_registered}, ipa_registered={ipa_registered})")
+            LOG.warning(
+                "%s does not have TOTP in both Keycloak and LDAP "
+                "(kc_registered=%s, ipa_registered=%s)",
+                username,
+                kc_registered,
+                ipa_registered,
+            )
 
         # If already registered *somewhere*
         if kc_registered or ipa_registered:
@@ -52,7 +58,7 @@ def enable():
 
         secret = generate_kc_otp(username)
         otp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
-            "{}@csh.rit.edu".format(username), issuer_name="CSH"
+            f"{username}@csh.rit.edu", issuer_name="CSH"
         )
 
         return render_template(
@@ -60,13 +66,16 @@ def enable():
         )
 
     otp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
-        "{}@csh.rit.edu".format(username), issuer_name="CSH"
+        f"{username}@csh.rit.edu", issuer_name="CSH"
     )
     if not secret:
         flash("Invalid secret provided. Please try again.")
         return redirect("/otp")
     if not otp_code:
-        flash("No one time password provided. Please scan the code and try again.")
+        flash(
+            "One time password provided did not match expected value. "
+            "Please scan the code and try again."
+        )
         return render_template(
             "otp.html", version=version, otp_uri=otp_uri, secret=secret
         )
@@ -74,7 +83,10 @@ def enable():
     try:
         register_kc_otp(username, secret, otp_code)
     except OTPInvalidCode:
-        flash("One time password provided did not match expected value. Please scan the code and try again.")
+        flash(
+            "One time password provided did not match expected value."
+            "Please scan the code and try again."
+        )
         return render_template(
             "otp.html", version=version, otp_uri=otp_uri, secret=secret
         )

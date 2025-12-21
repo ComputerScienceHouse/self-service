@@ -15,11 +15,14 @@ LOG = logging.getLogger(__name__)
 
 DEVICE_NAME = "SelfService"
 
+
 class OTPInvalidCode(Exception):
     """
-    Error when the initial code does not match expected. 
+    Error when the initial code does not match expected.
     """
+
     pass
+
 
 class OTPNotConfigured(Exception):
     """
@@ -27,6 +30,7 @@ class OTPNotConfigured(Exception):
     """
 
     pass
+
 
 class OTPAlreadyConfigured(Exception):
     """
@@ -69,10 +73,11 @@ def get_kc_user_id(username):
     )
     conn = admin.connection
     user = conn.raw_get(
-        "admin/realms/csh/users?first=0&max=20&search={}@csh.rit.edu".format(username)
+        f"admin/realms/csh/users?first=0&max=20&search={username}@csh.rit.edu"
     )
     user_id = json.loads(user.text)[0]["id"]
     return user_id
+
 
 def get_kc_service_account_token():
     """
@@ -84,17 +89,25 @@ def get_kc_service_account_token():
         realm_name="csh",
         client_id=app.config["OIDC_CLIENT_CONFIG"]["client_id"],
         client_secret_key=app.config["OIDC_CLIENT_CONFIG"]["client_secret"],
-        verify=True
+        verify=True,
     )
     token = keycloak_openid.token(grant_type="client_credentials")
     return token["access_token"]
 
+
 def get_kc_otp_is_registered(username):
+    """
+    Check if the given user has OTP registered in Keycloak.
+
+    Keyword arguments:
+    username -- Username of account to check
+    """
     user_id = get_kc_user_id(username)
     token = get_kc_service_account_token()
     response = requests.get(
         f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/isRegistered/{DEVICE_NAME}",
-        headers={"Authorization": f"Bearer {token}"}
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=30,
     )
     return response.ok
 
@@ -111,10 +124,11 @@ def generate_kc_otp(username):
     token = get_kc_service_account_token()
     response = requests.get(
         f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/generate",
-        headers={"Authorization": f"Bearer {token}"}
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=30,
     )
     response.raise_for_status()
-    return response.json()['encodedSecret']
+    return response.json()["encodedSecret"]
 
 
 def register_kc_otp(username, secret, otp_code):
@@ -132,14 +146,15 @@ def register_kc_otp(username, secret, otp_code):
         f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/register",
         headers={
             "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         },
         json={
             "encodedSecret": secret,
             "initialCode": otp_code,
             "deviceName": DEVICE_NAME,
-            "overwrite": False
-        }
+            "overwrite": False,
+        },
+        timeout=30,
     )
     resp = response.json()
 
@@ -158,6 +173,7 @@ def register_kc_otp(username, secret, otp_code):
         app.logger.error(response.text)
         response.raise_for_status()
 
+
 def delete_kc_otp(username):
     """
     Remove two-factor information from Keycloak account
@@ -172,11 +188,12 @@ def delete_kc_otp(username):
         f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/unregister",
         headers={
             "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         },
         json={
             "deviceName": DEVICE_NAME,
-        }
+        },
+        timeout=30,
     )
     resp = response.json()
 

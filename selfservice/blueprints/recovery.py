@@ -96,8 +96,8 @@ def verify_identity(recovery_id):
 
         # Make sure that methods are valid
     possible_methods = 0
-    for method in methods:
-        if methods[method]:
+    for _, value in methods.items():
+        if value:
             possible_methods += 1
 
     if possible_methods == 0:
@@ -247,7 +247,7 @@ def reset_password():
     else:
         flash("Whoops, those passwords didn't match!")
 
-    return redirect("/reset?token={}".format(token))
+    return redirect(f"/reset?token={token}")
 
 
 @recovery_bp.route("/admin", methods=["GET", "POST"])
