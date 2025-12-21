@@ -40,10 +40,15 @@ def enable():
     otp_code = request.form.get("otp-code", default="")
 
     if request.method == "GET":
+        kc_registered = get_kc_otp_is_registered(username)
+        ipa_registered = has_ipa_otp(username)
+
+        # If its registered in one place but not the other
+        if kc_registered != ipa_registered:
+            LOG.warn(f"{username} does not have TOTP in both Keycloak and LDAP (kc_registered={kc_registered}, ipa_registered={ipa_registered})")
+
         # If already registered *somewhere*
-        print(get_kc_otp_is_registered(username))
-        print(has_ipa_otp(username))
-        if get_kc_otp_is_registered(username) or has_ipa_otp(username):
+        if kc_registered or ipa_registered:
             return render_template("otp.html", version=version, configured=True)
 
         secret = generate_kc_otp(username)
