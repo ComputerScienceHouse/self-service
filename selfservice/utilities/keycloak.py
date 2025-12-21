@@ -16,6 +16,12 @@ LOG = logging.getLogger(__name__)
 
 DEVICE_NAME = "SelfService"
 
+class OTPInvalidCode(Exception):
+    """
+    Error when the initial code does not match expected. 
+    """
+    pass
+
 class OTPNotConfigured(Exception):
     """
     Error for accounts who don't have OTP configured.
@@ -140,6 +146,8 @@ def register_kc_otp(username, secret, otp_code):
 
     if "message" in resp:
         match resp["message"]:
+            case "Invalid initial TOTP code":
+                raise OTPInvalidCode()
             case "TOTP credential already exists":
                 raise OTPAlreadyConfigured()
             case "Invalid secret":

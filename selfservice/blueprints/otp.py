@@ -12,10 +12,11 @@ import dill as pickle
 
 from selfservice.utilities.keycloak import (
     OTPConfigError,
+    OTPInvalidCode,
+    OTPAlreadyConfigured,
     get_kc_otp_is_registered,
     generate_kc_otp,
     register_kc_otp,
-    OTPAlreadyConfigured,
     delete_kc_otp,
 )
 from selfservice.utilities.ldap import create_ipa_otp, has_ipa_otp, delete_ipa_otp
@@ -54,17 +55,27 @@ def enable():
             "otp.html", version=version, otp_uri=otp_uri, secret=secret
         )
 
+    otp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
+        "{}@csh.rit.edu".format(username), issuer_name="CSH"
+    )
     if not secret:
         flash("Invalid secret provided. Please try again.")
         return redirect("/otp")
     if not otp_code:
         flash("No one time password provided. Please scan the code and try again.")
-        return redirect("/otp".format(secret))
+        return render_template(
+            "otp.html", version=version, otp_uri=otp_uri, secret=secret
+        )
 
     try:
         register_kc_otp(username, secret, otp_code)
+    except OTPInvalidCode:
+        flash("One time password provided did not match expected value. Please scan the code and try again.")
+        return render_template(
+            "otp.html", version=version, otp_uri=otp_uri, secret=secret
+        )
     except OTPConfigError:
-        flash("Invalid one time code provided or session expired.")
+        flash("Invalid secret, try again.")
         return redirect("/otp")
     except OTPAlreadyConfigured:
         flash("2FA already configured.")
