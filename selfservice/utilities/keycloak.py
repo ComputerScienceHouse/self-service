@@ -94,7 +94,7 @@ def get_kc_otp_is_registered(username):
     user_id = get_kc_user_id(username)
     token = get_kc_service_account_token()
     response = requests.get(
-        f"https://sso.csh.rit.edu/auth/realms/csh/totp-api/{user_id}/isRegistered/{DEVICE_NAME}",
+        f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/isRegistered/{DEVICE_NAME}",
         headers={"Authorization": f"Bearer {token}"}
     )
     return response.ok
@@ -111,7 +111,7 @@ def generate_kc_otp(username):
     user_id = get_kc_user_id(username)
     token = get_kc_service_account_token()
     response = requests.get(
-        f"https://sso.csh.rit.edu/auth/realms/csh/totp-api/{user_id}/generate",
+        f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/generate",
         headers={"Authorization": f"Bearer {token}"}
     )
     response.raise_for_status()
@@ -130,7 +130,7 @@ def register_kc_otp(username, secret, otp_code):
     token = get_kc_service_account_token()
 
     response = requests.post(
-        f"https://sso.csh.rit.edu/auth/realms/csh/totp-api/{user_id}/register",
+        f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/register",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
@@ -169,7 +169,7 @@ def delete_kc_otp(username):
     token = get_kc_service_account_token()
 
     response = requests.post(
-        f"https://sso.csh.rit.edu/auth/realms/csh/totp-api/{user_id}/unregister",
+        f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/unregister",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
