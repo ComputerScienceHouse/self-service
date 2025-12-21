@@ -84,6 +84,8 @@ future==1.0.0
     # via pyjwkest
 greenlet==3.3.0
     # via sqlalchemy
+gunicorn==23.0.0
+    # via -r requirements.in
 h11==0.16.0
     # via httpcore
 httpcore==1.0.9
@@ -129,6 +131,7 @@ ordered-set==4.1.0
 packaging==25.0
     # via
     #   deprecation
+    #   gunicorn
     #   limits
 passlib==1.7.4
     # via -r requirements.in
