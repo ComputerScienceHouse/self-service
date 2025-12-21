@@ -53,19 +53,6 @@ class PhoneVerification(db.Model):
     code = Column(String(6), primary_key=True)
     session = Column(String(36), ForeignKey("session.id"))
 
-
-class OTPSession(db.Model):
-    """
-    Once an OTP secret has been generated for a user, we pickle their session
-    so that we can retrieve it and eventually verify their token.
-    """
-
-    __tablename__ = "otp_session"
-    secret = Column(String(100), primary_key=True)
-    form = Column(LargeBinary)
-    session = Column(LargeBinary)
-
-
 class AppSpecificPassword(db.Model):
     """
     Allows users to authenticate to applications that don't support two factor
