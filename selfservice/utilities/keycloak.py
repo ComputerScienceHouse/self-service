@@ -148,7 +148,7 @@ def register_kc_otp(username, secret, otp_code):
                 raise OTPConfigError()
 
     if not response.ok:
-        app.logger.error(resp.text)
+        app.logger.error(response.text)
         response.raise_for_status()
 def delete_kc_otp(username):
     """
@@ -173,7 +173,6 @@ def delete_kc_otp(username):
     resp = response.json()
 
     if "message" in resp:
-        print(resp)
         match resp["message"]:
             case "TOTP credential not found":
                 raise OTPNotConfigured()
@@ -181,5 +180,5 @@ def delete_kc_otp(username):
                 raise OTPConfigError()
 
     if not response.ok:
-        app.logger.error(resp)
+        app.logger.error(response.text)
         response.raise_for_status()
