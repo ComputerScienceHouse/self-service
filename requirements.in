@@ -13,7 +13,5 @@ sentry-sdk[Flask]
 psycopg2-binary~=2.9.11
 twilio~=9.9.0
 pyotp~=2.9.0
-dill~=0.4.0
-beautifulsoup4~=4.14.3
 passlib~=1.7.4
 xkcdpass~=1.20.0

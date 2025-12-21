@@ -22,8 +22,6 @@ async-property==0.2.2
     # via python-keycloak
 attrs==25.4.0
     # via aiohttp
-beautifulsoup4==4.14.3
-    # via -r requirements.in
 blinker==1.9.0
     # via
     #   flask
@@ -52,8 +50,6 @@ deprecated==1.3.1
     # via limits
 deprecation==2.1.0
     # via python-keycloak
-dill==0.4.0
-    # via -r requirements.in
 dnspython==2.8.0
     # via srvlookup
 flask==3.1.2
@@ -194,8 +190,6 @@ sentry-sdk==2.48.0
     # via -r requirements.in
 six==1.17.0
     # via pyjwkest
-soupsieve==2.8.1
-    # via beautifulsoup4
 sqlalchemy==2.0.45
     # via
     #   alembic
@@ -211,7 +205,6 @@ typing-extensions==4.15.0
     #   aiosignal
     #   alembic
     #   anyio
-    #   beautifulsoup4
     #   flask-limiter
     #   jwcrypto
     #   limits

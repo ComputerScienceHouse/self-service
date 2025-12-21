@@ -7,7 +7,6 @@ import pyotp
 
 from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
-import dill as pickle
 
 
 from selfservice.utilities.keycloak import (

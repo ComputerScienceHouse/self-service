@@ -5,7 +5,6 @@ Functions for interacting with the Keycloak service.
 import json
 import logging
 
-from bs4 import BeautifulSoup
 from keycloak import KeycloakAdmin, KeycloakOpenID
 import requests
 import pyotp
@@ -158,6 +157,7 @@ def register_kc_otp(username, secret, otp_code):
     if not response.ok:
         app.logger.error(response.text)
         response.raise_for_status()
+
 def delete_kc_otp(username):
     """
     Remove two-factor information from Keycloak account
