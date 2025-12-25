@@ -48,7 +48,7 @@ cryptography==46.0.3
     # via
     #   jwcrypto
     #   oic
-csh-ldap @ git+https://github.com/costowell/csh_ldap@dbc3193482615b4cd52c5d1fb260662ec8157ace
+csh-ldap==2.5.2
     # via -r requirements.in
 defusedxml==0.7.1
     # via oic
