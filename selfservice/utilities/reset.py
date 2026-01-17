@@ -107,12 +107,12 @@ def passwd_reset(username, password):
     """
 
     # Create LDAP admin session to perform initial reset.
-    dn = "uid={},cn=users,cn=accounts,dc=csh,dc=rit,dc=edu".format(username)
+    dn = f"uid={username},cn=users,cn=accounts,dc=csh,dc=rit,dc=edu"
 
     # Find FreeIPA server
     ldap_srvs = srvlookup.lookup("ldap", "tcp", "csh.rit.edu")
     ldap_uri = ldap_srvs[0].hostname
-    l = ldap.initialize("ldaps://{}".format(ldap_uri))
+    l = ldap.initialize(f"ldaps://{ldap_uri}")
     l.simple_bind_s(app.config["LDAP_BIND_DN"], app.config["LDAP_BIND_PW"])
     l.modify_s(dn, [(ldap.MOD_REPLACE, "userPassword", [password.encode()])])
     l.modify_s(dn, [(ldap.MOD_REPLACE, "nsaccountlock", ["false".encode()])])
@@ -120,8 +120,9 @@ def passwd_reset(username, password):
     # FreeIPA automatically expires the password set through the previous
     # method, so we need to use their password change API to get past that.
     requests.post(
-        "https://{}/ipa/session/change_password".format(ldap_uri),
+        f"https://{ldap_uri}/ipa/session/change_password",
         data={"user": username, "old_password": password, "new_password": password},
+        timeout=30,
     )
 
 
@@ -138,8 +139,9 @@ def passwd_change(username, old_pw, new_pw):
     ldap_srvs = srvlookup.lookup("ldap", "tcp", "csh.rit.edu")
     ldap_uri = ldap_srvs[0].hostname
     change = requests.post(
-        "https://{}/ipa/session/change_password".format(ldap_uri),
+        f"https://{ldap_uri}/ipa/session/change_password",
         data={"user": username, "old_password": old_pw, "new_password": new_pw},
+        timeout=30,
     )
     if change.headers.get("X-IPA-Pwchange-Result") == "invalid-password":
         raise PasswordChangeFailed

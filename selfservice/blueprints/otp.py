@@ -7,20 +7,20 @@ import pyotp
 
 from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
-import dill as pickle
 
 
 from selfservice.utilities.keycloak import (
     OTPConfigError,
-    create_kc_otp,
-    confirm_kc_otp,
+    OTPInvalidCode,
     OTPAlreadyConfigured,
+    get_kc_otp_is_registered,
+    generate_kc_otp,
+    register_kc_otp,
     delete_kc_otp,
 )
-from selfservice.utilities.ldap import create_ipa_otp, delete_ipa_otp
+from selfservice.utilities.ldap import create_ipa_otp, has_ipa_otp, delete_ipa_otp
 from selfservice.utilities.app_passwd import set_app_passwd, delete_app_passwd
-from selfservice.models import OTPSession
-from selfservice import version, auth, db, OIDC_PROVIDER
+from selfservice import version, auth, OIDC_PROVIDER
 
 otp_bp = Blueprint("otp", __name__)
 
@@ -39,51 +39,66 @@ def enable():
     otp_code = request.form.get("otp-code", default="")
 
     if request.method == "GET":
-        try:
-            session, form_data, secret = create_kc_otp(username)
+        kc_registered = get_kc_otp_is_registered(username)
+        ipa_registered = has_ipa_otp(username)
 
-            save_session = OTPSession(
-                secret=secret,
-                form=pickle.dumps(form_data),
-                session=pickle.dumps(session),
+        # If its registered in one place but not the other
+        if kc_registered != ipa_registered:
+            LOG.warning(
+                "%s does not have TOTP in both Keycloak and LDAP "
+                "(kc_registered=%s, ipa_registered=%s)",
+                username,
+                kc_registered,
+                ipa_registered,
             )
-            db.session.add(save_session)
-            db.session.commit()
-        except OTPAlreadyConfigured:
+
+        # If already registered *somewhere*
+        if kc_registered or ipa_registered:
             return render_template("otp.html", version=version, configured=True)
 
+        secret = generate_kc_otp(username)
         otp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
-            "{}@csh.rit.edu".format(username), issuer_name="CSH"
+            f"{username}@csh.rit.edu", issuer_name="CSH"
         )
 
         return render_template(
             "otp.html", version=version, otp_uri=otp_uri, secret=secret
         )
 
-    otp_session = OTPSession.query.filter_by(secret=secret).first()
-
-    if not secret or not otp_session:
+    otp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
+        f"{username}@csh.rit.edu", issuer_name="CSH"
+    )
+    if not secret:
         flash("Invalid secret provided. Please try again.")
         return redirect("/otp")
     if not otp_code:
-        flash("No one time password provided. Please scan the code and try again.")
-        return redirect("/otp".format(secret))
-
-    session = pickle.loads(otp_session.session)
-    form = pickle.loads(otp_session.form)
+        flash(
+            "One time password provided did not match expected value. "
+            "Please scan the code and try again."
+        )
+        return render_template(
+            "otp.html", version=version, otp_uri=otp_uri, secret=secret
+        )
 
     try:
-        confirm_kc_otp(session, form)
+        register_kc_otp(username, secret, otp_code)
+    except OTPInvalidCode:
+        flash(
+            "One time password provided did not match expected value."
+            "Please scan the code and try again."
+        )
+        return render_template(
+            "otp.html", version=version, otp_uri=otp_uri, secret=secret
+        )
     except OTPConfigError:
-        flash("Invalid one time code provided or session expired.")
+        flash("Invalid secret, try again.")
+        return redirect("/otp")
+    except OTPAlreadyConfigured:
+        flash("2FA already configured.")
         return redirect("/otp")
 
     create_ipa_otp(username, secret)
     app_passwd = set_app_passwd(username)
-
-    # Clean up used session data
-    OTPSession.query.filter_by(secret=secret).delete()
-    db.session.commit()
 
     return render_template(
         "otp.html", version=version, configured=True, passwd=app_passwd

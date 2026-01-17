@@ -21,21 +21,21 @@ def verif_methods(username):
     user = ldap.get_member(username, True)
 
     if user.mail:
-        for addr in user.__getattr__("mail", as_list=True):
+        for addr in getattr(user, "mail", as_list=True):
             if "rit.edu" not in addr and "@" in addr:
                 name, domain = addr.strip().split("@")
                 display = name[:1] + "..." + name[-1:] + "@" + domain
                 methods["email"].append({"data": addr, "display": display})
 
     if user.mobile:
-        for number in user.__getattr__("mobile", as_list=True):
+        for number in getattr(user, "mobile", as_list=True):
             stripped = re.sub("[^0-9]", "", number)
             if len(stripped) == 10:
-                display = "(XXX) XXX-{}".format(stripped[-4:])
+                display = f"(XXX) XXX-{stripped[-4:]}"
                 methods["phone"].append({"data": stripped, "display": display})
 
     if user.telephoneNumber:
-        for number in user.__getattr__("telephoneNumber", as_list=True):
+        for number in getattr(user, "telephoneNumber", as_list=True):
             stripped = re.sub("[^0-9]", "", number)
             if len(stripped) == 10:
                 methods["phone"].append(stripped)
@@ -91,6 +91,18 @@ def create_ipa_otp(username, secret):
     ipa_login()
     data = {"ipatokenowner": username, "ipatokenotpkey": secret}
     ipa._request("otptoken_add", params=data)
+
+
+def has_ipa_otp(username):
+    """
+    Check if the given user has any OTP tokens configured in FreeIPA.
+
+    Keyword arguments:
+    username -- Username of account to check
+    """
+    ipa_login()
+    token_info = ipa._request("otptoken_find", params={"ipatokenowner": username})
+    return len(token_info["result"]) > 0
 
 
 def delete_ipa_otp(username):

@@ -9,7 +9,6 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     Boolean,
-    Binary,
     func,
 )
 from selfservice import db
@@ -24,7 +23,7 @@ class ResetToken(db.Model):
     __tablename__ = "token"
     id = Column(Integer, primary_key=True)
     username = Column(String(64), nullable=False)
-    created = Column(DateTime, default=func.timezone("UTC", func.current_timestamp()))
+    created = Column(DateTime, default=func.timezone("UTC", func.current_timestamp))
     token = Column(String(36))
     session = Column(String(36), ForeignKey("session.id"))
     used = Column(Boolean)
@@ -40,7 +39,7 @@ class RecoverySession(db.Model):
     __tablename__ = "session"
     id = Column(String(36), primary_key=True)
     username = Column(String(64), nullable=False)
-    created = Column(DateTime, default=func.timezone("UTC", func.current_timestamp()))
+    created = Column(DateTime, default=func.timezone("UTC", func.current_timestamp))
 
 
 class PhoneVerification(db.Model):
@@ -52,18 +51,6 @@ class PhoneVerification(db.Model):
     __tablename__ = "phone_codes"
     code = Column(String(6), primary_key=True)
     session = Column(String(36), ForeignKey("session.id"))
-
-
-class OTPSession(db.Model):
-    """
-    Once an OTP secret has been generated for a user, we pickle their session
-    so that we can retrieve it and eventually verify their token.
-    """
-
-    __tablename__ = "otp_session"
-    secret = Column(String(100), primary_key=True)
-    form = Column(Binary)
-    session = Column(Binary)
 
 
 class AppSpecificPassword(db.Model):

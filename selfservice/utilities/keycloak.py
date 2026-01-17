@@ -5,14 +5,31 @@ Functions for interacting with the Keycloak service.
 import json
 import logging
 
-from bs4 import BeautifulSoup
-from keycloak import KeycloakAdmin
+from keycloak import KeycloakAdmin, KeycloakOpenID
 import requests
 import pyotp
 
 from selfservice import app
 
 LOG = logging.getLogger(__name__)
+
+DEVICE_NAME = "SelfService"
+
+
+class OTPInvalidCode(Exception):
+    """
+    Error when the initial code does not match expected.
+    """
+
+    pass
+
+
+class OTPNotConfigured(Exception):
+    """
+    Error for accounts who don't have OTP configured.
+    """
+
+    pass
 
 
 class OTPAlreadyConfigured(Exception):
@@ -40,7 +57,7 @@ def generate_otp(secret):
     return code
 
 
-def get_kc_cookies(username):
+def get_kc_user_id(username):
     """
     Login as Keycloak Admin and Impersonate User
 
@@ -56,49 +73,65 @@ def get_kc_cookies(username):
     )
     conn = admin.connection
     user = conn.raw_get(
-        "admin/realms/csh/users?first=0&max=20&search={}@csh.rit.edu".format(username)
+        f"admin/realms/csh/users?first=0&max=20&search={username}@csh.rit.edu"
     )
     user_id = json.loads(user.text)[0]["id"]
-    imp = conn.raw_post(
-        "admin/realms/csh/users/{}/impersonation".format(user_id),
-        data=json.dumps({"user": user_id, "realm": "csh"}),
+    return user_id
+
+
+def get_kc_service_account_token():
+    """
+    Get an auth token for the OIDC client's associated service account
+    """
+
+    keycloak_openid = KeycloakOpenID(
+        server_url="https://sso.csh.rit.edu/auth/",
+        realm_name="csh",
+        client_id=app.config["OIDC_CLIENT_CONFIG"]["client_id"],
+        client_secret_key=app.config["OIDC_CLIENT_CONFIG"]["client_secret"],
+        verify=True,
     )
-    return imp.cookies
+    token = keycloak_openid.token(grant_type="client_credentials")
+    return token["access_token"]
 
 
-def create_kc_otp(username):
+def get_kc_otp_is_registered(username):
+    """
+    Check if the given user has OTP registered in Keycloak.
+
+    Keyword arguments:
+    username -- Username of account to check
+    """
+    user_id = get_kc_user_id(username)
+    token = get_kc_service_account_token()
+    response = requests.get(
+        f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/isRegistered/{DEVICE_NAME}",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=30,
+    )
+    return response.ok
+
+
+def generate_kc_otp(username):
     """
     Use session to generate a OTP Secret
 
     Keyword arguments:
     username -- Username of account to generate secret for
     """
-    session = requests.Session()
-    session.cookies = get_kc_cookies(username)
-    page = session.get(
-        "https://sso.csh.rit.edu/auth/realms/csh/account/totp?mode=manual"
+
+    user_id = get_kc_user_id(username)
+    token = get_kc_service_account_token()
+    response = requests.get(
+        f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/generate",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=30,
     )
-
-    # Check if the user already has OTP configured
-    if "Configured Authenticators" in page.text:
-        raise OTPAlreadyConfigured
-
-    soup = BeautifulSoup(page.text, "html.parser")
-    key = soup.find("span", {"id": "kc-totp-secret-key"})
-    parsed_key = key.text.replace(" ", "")
-    state_checker = soup.find("input", {"id": "stateChecker"}).get("value")
-    secret = soup.find("input", {"id": "totpSecret"}).get("value")
-    form_data = {
-        "userLabel": "Self-Service TOTP",
-        "stateChecker": state_checker,
-        "totp": generate_otp(parsed_key),
-        "totpSecret": secret,
-        "submitAction": "Save",
-    }
-    return session, form_data, parsed_key
+    response.raise_for_status()
+    return response.json()["encodedSecret"]
 
 
-def confirm_kc_otp(session, form_data):
+def register_kc_otp(username, secret, otp_code):
     """
     Confirm the key given by the user.
 
@@ -106,12 +139,39 @@ def confirm_kc_otp(session, form_data):
     session -- Session object with Keycloak cookies
     form_data -- Form validation information
     """
-    save = session.post(
-        "https://sso.csh.rit.edu/auth/realms/csh/account/totp", data=form_data
-    )
+    user_id = get_kc_user_id(username)
+    token = get_kc_service_account_token()
 
-    if "Configured Authenticators" not in save.text:
-        raise OTPConfigError
+    response = requests.post(
+        f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/register",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "encodedSecret": secret,
+            "initialCode": otp_code,
+            "deviceName": DEVICE_NAME,
+            "overwrite": False,
+        },
+        timeout=30,
+    )
+    resp = response.json()
+
+    if "message" in resp:
+        match resp["message"]:
+            case "Invalid initial TOTP code":
+                raise OTPInvalidCode()
+            case "TOTP credential already exists":
+                raise OTPAlreadyConfigured()
+            case "Invalid secret":
+                raise OTPConfigError()
+            case "Invalid request":
+                raise OTPConfigError()
+
+    if not response.ok:
+        app.logger.error(response.text)
+        response.raise_for_status()
 
 
 def delete_kc_otp(username):
@@ -121,26 +181,29 @@ def delete_kc_otp(username):
     Keyword arguments:
     username -- Username of account to manipulate
     """
-    session = requests.Session()
-    session.cookies = get_kc_cookies(username)
-    page = session.get(
-        "https://sso.csh.rit.edu/auth/realms/csh/account/totp?mode=manual"
-    )
-    soup = BeautifulSoup(page.text, "html.parser")
-    state_checker = soup.find("input", {"id": "stateChecker"}).get("value")
-    credential_id = soup.find("input", {"id": "credentialId"}).get("value")
-    form_data = {
-        "credentialId": credential_id,
-        "stateChecker": state_checker,
-        "submitAction": "Delete",
-    }
-    delete = session.post(
-        "https://sso.csh.rit.edu/auth/realms/csh/account/totp", data=form_data
-    )
-    LOG.info(delete.text)
-    check = session.get(
-        "https://sso.csh.rit.edu/auth/realms/csh/account/totp?mode=manual"
-    )
+    user_id = get_kc_user_id(username)
+    token = get_kc_service_account_token()
 
-    if "Configured Authenticators" in check.text:
-        raise OTPConfigError
+    response = requests.post(
+        f"{app.config["OIDC_ISSUER"]}/totp-api/{user_id}/unregister",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "deviceName": DEVICE_NAME,
+        },
+        timeout=30,
+    )
+    resp = response.json()
+
+    if "message" in resp:
+        match resp["message"]:
+            case "TOTP credential not found":
+                raise OTPNotConfigured()
+            case "Invalid request":
+                raise OTPConfigError()
+
+    if not response.ok:
+        app.logger.error(response.text)
+        response.raise_for_status()
