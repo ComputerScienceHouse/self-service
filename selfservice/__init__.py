@@ -34,11 +34,7 @@ else:
     app.config.from_pyfile(os.path.join(os.getcwd(), "config.env.py"))
 
 # Get Git Revision
-version = (
-    subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
-    .decode("utf-8")
-    .rstrip()
-)
+version = open("rev", "r").read().rstrip()
 
 # Setup Sentry tracking
 sentry_sdk.init(

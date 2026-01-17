@@ -3,7 +3,7 @@ MAINTAINER Computer Science House <webmaster@csh.rit.edu>
 
 RUN mkdir /opt/selfservice
 
-ADD requirements.txt /opt/selfservice
+COPY requirements.txt /opt/selfservice
 
 WORKDIR /opt/selfservice
 
@@ -12,7 +12,8 @@ RUN apt-get -yq update && \
     pip install -r requirements.txt && \
     apt-get -yq clean all
 
-ADD . /opt/selfservice
+COPY . /opt/selfservice
+RUN git rev-parse --short HEAD > rev
 
 EXPOSE 8080
 
