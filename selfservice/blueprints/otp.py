@@ -3,12 +3,13 @@ Flask blueprint for handling creating and removing OTP secrets from accounts.
 """
 
 import logging
-import pyotp
 
+import pyotp
 from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
 
-
+from selfservice import version, auth, OIDC_PROVIDER
+from selfservice.utilities.app_passwd import delete_app_passwd
 from selfservice.utilities.keycloak import (
     OTPConfigError,
     OTPInvalidCode,
@@ -18,9 +19,7 @@ from selfservice.utilities.keycloak import (
     register_kc_otp,
     delete_kc_otp,
 )
-from selfservice.utilities.ldap import create_ipa_otp, has_ipa_otp, delete_ipa_otp
-from selfservice.utilities.app_passwd import set_app_passwd, delete_app_passwd
-from selfservice import version, auth, OIDC_PROVIDER
+from selfservice.utilities.ldap import delete_ipa_otp
 
 otp_bp = Blueprint("otp", __name__)
 
@@ -31,8 +30,7 @@ LOG = logging.getLogger(__name__)
 @auth.oidc_auth(OIDC_PROVIDER)
 def enable():
     """
-    Creates a Keycloak OTP secret and then displays that to the user. Once
-    the user has verified their token, it is then replicated in FreeIPA.
+    Creates a Keycloak OTP secret and then displays that to the user.
     """
     username = flask_session["userinfo"].get("preferred_username")
     secret = request.args.get("secret", default="", type=str)
@@ -40,20 +38,9 @@ def enable():
 
     if request.method == "GET":
         kc_registered = get_kc_otp_is_registered(username)
-        ipa_registered = has_ipa_otp(username)
 
-        # If its registered in one place but not the other
-        if kc_registered != ipa_registered:
-            LOG.warning(
-                "%s does not have TOTP in both Keycloak and LDAP "
-                "(kc_registered=%s, ipa_registered=%s)",
-                username,
-                kc_registered,
-                ipa_registered,
-            )
-
-        # If already registered *somewhere*
-        if kc_registered or ipa_registered:
+        # If already registered
+        if kc_registered:
             return render_template("otp.html", version=version, configured=True)
 
         secret = generate_kc_otp(username)
@@ -97,12 +84,7 @@ def enable():
         flash("2FA already configured.")
         return redirect("/otp")
 
-    create_ipa_otp(username, secret)
-    app_passwd = set_app_passwd(username)
-
-    return render_template(
-        "otp.html", version=version, configured=True, passwd=app_passwd
-    )
+    return render_template("otp.html", version=version, configured=True)
 
 
 @otp_bp.route("/otp/remove", methods=["GET"])
