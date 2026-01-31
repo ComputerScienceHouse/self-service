@@ -84,9 +84,7 @@ def enable():
         flash("2FA already configured.")
         return redirect("/otp")
 
-    return render_template(
-        "otp.html", version=version, configured=True
-    )
+    return render_template("otp.html", version=version, configured=True)
 
 
 @otp_bp.route("/otp/remove", methods=["GET"])
