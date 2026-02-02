@@ -29,19 +29,22 @@ class PasswordChangeFailed(Exception):
 
     pass
 
+
 class CurrentPasswordInvalid(Exception):
     """
     Error raised when the current password is invalid.
     """
+
     pass
+
 
 class PasswordPolicyViolation(Exception):
     """
     Error raised when the new password doesn't meet the password policy
     """
+
     def __init__(self, message):
         self.message = message
-
 
 
 def generate_token(session):

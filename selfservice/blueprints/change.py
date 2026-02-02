@@ -4,8 +4,12 @@ current password.
 """
 
 from flask import Blueprint, render_template, request, redirect, flash
-from selfservice.utilities.reset import passwd_change, PasswordChangeFailed, PasswordPolicyViolation, \
-    CurrentPasswordInvalid
+from selfservice.utilities.reset import (
+    passwd_change,
+    PasswordChangeFailed,
+    PasswordPolicyViolation,
+    CurrentPasswordInvalid,
+)
 from selfservice import version
 
 change_bp = Blueprint("change", __name__)
