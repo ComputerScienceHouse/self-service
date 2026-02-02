@@ -29,6 +29,20 @@ class PasswordChangeFailed(Exception):
 
     pass
 
+class CurrentPasswordInvalid(Exception):
+    """
+    Error raised when the current password is invalid.
+    """
+    pass
+
+class PasswordPolicyViolation(Exception):
+    """
+    Error raised when the new password doesn't meet the password policy
+    """
+    def __init__(self, message):
+        self.message = message
+
+
 
 def generate_token(session):
     """
@@ -138,10 +152,22 @@ def passwd_change(username, old_pw, new_pw):
     # Find FreeIPA server
     ldap_srvs = srvlookup.lookup("ldap", "tcp", "csh.rit.edu")
     ldap_uri = ldap_srvs[0].hostname
+    password_url = f"https://{ldap_uri}/ipa/session/change_password"
+    headers = {
+        "Referer": password_url,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "text/plain",
+    }
     change = requests.post(
-        f"https://{ldap_uri}/ipa/session/change_password",
+        password_url,
+        headers=headers,
         data={"user": username, "old_password": old_pw, "new_password": new_pw},
         timeout=30,
     )
-    if change.headers.get("X-IPA-Pwchange-Result") == "invalid-password":
+    pwchange_result = change.headers.get("X-IPA-Pwchange-Result")
+    if pwchange_result == "invalid-password":
+        raise CurrentPasswordInvalid
+    if pwchange_result == "policy-error":
+        raise PasswordPolicyViolation(change.headers.get("X-IPA-Pwchange-Policy-Error"))
+    if pwchange_result != "ok" or change.status_code != 200:
         raise PasswordChangeFailed

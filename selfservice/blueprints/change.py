@@ -4,7 +4,8 @@ current password.
 """
 
 from flask import Blueprint, render_template, request, redirect, flash
-from selfservice.utilities.reset import passwd_change, PasswordChangeFailed
+from selfservice.utilities.reset import passwd_change, PasswordChangeFailed, PasswordPolicyViolation, \
+    CurrentPasswordInvalid
 from selfservice import version
 
 change_bp = Blueprint("change", __name__)
@@ -24,14 +25,15 @@ def change():
     verify = request.form.get("verify")
 
     if new_pw == verify:
-        if len(new_pw) >= 12:
-            try:
-                passwd_change(username, old_pw, new_pw)
-                return render_template("success.html", reset=True, version=version)
-            except PasswordChangeFailed:
-                flash("Incorrect password, please try again.")
-        else:
-            flash("Your password does not meet the requirements below.")
+        try:
+            passwd_change(username, old_pw, new_pw)
+            return render_template("success.html", reset=True, version=version)
+        except CurrentPasswordInvalid:
+            flash("Your current password is incorrect, please try again.")
+        except PasswordPolicyViolation as e:
+            flash("Your new password does not match the requirements:", e.message)
+        except PasswordChangeFailed:
+            flash("An unknown error occurred.")
     else:
         flash("Whoops, those passwords didn't match!")
 
