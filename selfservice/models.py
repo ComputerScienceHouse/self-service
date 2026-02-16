@@ -23,7 +23,7 @@ class ResetToken(db.Model):
     __tablename__ = "token"
     id = Column(Integer, primary_key=True)
     username = Column(String(64), nullable=False)
-    created = Column(DateTime, default=func.timezone("UTC", func.current_timestamp))
+    created = Column(DateTime, default=func.timezone("UTC", func.now()))
     token = Column(String(36))
     session = Column(String(36), ForeignKey("session.id"))
     used = Column(Boolean)
@@ -39,7 +39,7 @@ class RecoverySession(db.Model):
     __tablename__ = "session"
     id = Column(String(36), primary_key=True)
     username = Column(String(64), nullable=False)
-    created = Column(DateTime, default=func.timezone("UTC", func.current_timestamp))
+    created = Column(DateTime, server_default=func.timezone("UTC", func.now()))
 
 
 class PhoneVerification(db.Model):
