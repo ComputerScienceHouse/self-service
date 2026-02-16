@@ -39,7 +39,7 @@ class RecoverySession(db.Model):
     __tablename__ = "session"
     id = Column(String(36), primary_key=True)
     username = Column(String(64), nullable=False)
-    created = Column(DateTime, server_default=func.timezone("UTC", func.now()))
+    created = Column(DateTime, default=func.timezone("UTC", func.now()))
 
 
 class PhoneVerification(db.Model):
