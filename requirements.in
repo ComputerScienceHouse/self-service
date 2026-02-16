@@ -6,7 +6,7 @@ Flask-Limiter~=4.1.1
 Flask-QRcode~=3.2.0
 Flask-xCaptcha~=0.5.5
 srvlookup~=3.0.0
-csh-ldap~=2.5.2
+csh-ldap~=2.5.3
 python-freeipa~=1.0.10
 python-keycloak~=5.8.1
 sentry-sdk[Flask]
