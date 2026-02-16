@@ -21,21 +21,21 @@ def verif_methods(username):
     user = ldap.get_member(username, uid=True)
 
     if user.mail:
-        for addr in user.__getattr__("mail", as_list=True):
+        for addr in user.get("mail"):
             if "rit.edu" not in addr and "@" in addr:
                 name, domain = addr.strip().split("@")
                 display = name[:1] + "..." + name[-1:] + "@" + domain
                 methods["email"].append({"data": addr, "display": display})
 
     if user.mobile:
-        for number in user.__getattr__("mobile", as_list=True):
+        for number in user.get("mobile"):
             stripped = re.sub("[^0-9]", "", number)
             if len(stripped) == 10:
                 display = f"(XXX) XXX-{stripped[-4:]}"
                 methods["phone"].append({"data": stripped, "display": display})
 
     if user.telephoneNumber:
-        for number in user.__getattr__("telephoneNumber", as_list=True):
+        for number in user.get("telephoneNumber"):
             stripped = re.sub("[^0-9]", "", number)
             if len(stripped) == 10:
                 methods["phone"].append(stripped)

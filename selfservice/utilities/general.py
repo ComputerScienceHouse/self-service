@@ -66,8 +66,14 @@ def phone_recovery(phone, token):
         current_app.config.get("TWILIO_SID"), current_app.config.get("TWILIO_TOKEN")
     )
 
+    # REMOVE ME
+    client.http_client.logger = current_app.logger
+    print(f"twilio client: {client}")
+    # REMOVE ME
+
     body = f"Your CSH account recovery PIN is: {token}"
 
-    client.messages.create(
+    m = client.messages.create(
         to=phone, from_=from_number, body=body, messaging_service_sid=service_sid
     )
+    print(m)
