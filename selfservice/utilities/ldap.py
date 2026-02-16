@@ -18,24 +18,24 @@ def verif_methods(username):
     """
     methods = {"email": [], "phone": [], "rit": None}
 
-    user = ldap.get_member(username, True)
+    user = ldap.get_member(username, uid=True)
 
     if user.mail:
-        for addr in getattr(user, "mail", as_list=True):
+        for addr in user.__getattr__("mail", as_list=True):
             if "rit.edu" not in addr and "@" in addr:
                 name, domain = addr.strip().split("@")
                 display = name[:1] + "..." + name[-1:] + "@" + domain
                 methods["email"].append({"data": addr, "display": display})
 
     if user.mobile:
-        for number in getattr(user, "mobile", as_list=True):
+        for number in user.__getattr__("mobile", as_list=True):
             stripped = re.sub("[^0-9]", "", number)
             if len(stripped) == 10:
                 display = f"(XXX) XXX-{stripped[-4:]}"
                 methods["phone"].append({"data": stripped, "display": display})
 
     if user.telephoneNumber:
-        for number in getattr(user, "telephoneNumber", as_list=True):
+        for number in user.__getattr__("telephoneNumber", as_list=True):
             stripped = re.sub("[^0-9]", "", number)
             if len(stripped) == 10:
                 methods["phone"].append(stripped)
