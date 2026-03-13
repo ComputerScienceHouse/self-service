@@ -96,7 +96,9 @@
 										<img src="https://profiles.csh.rit.edu/image/{{session["username"]}}">{{session["username"]}}</th>
 									</div>
 								<td class="border-top-0">
+									{% if session["session_created"] %}
 									{{session["session_created"].strftime('%m/%d %H:%M')}}
+									{% endif %}
 								</td>
 								<td class="border-top-0">
 									{% if session["token_created"] %}
