@@ -63,7 +63,11 @@ def generate_token(session):
 
         # Create the object in the database.
     reset = ResetToken(
-        username=session.username, token=token, session=session.id, used=False, expires=session.expires
+        username=session.username,
+        token=token,
+        session=session.id,
+        used=False,
+        expires=session.expires,
     )
     db.session.add(reset)
     db.session.commit()

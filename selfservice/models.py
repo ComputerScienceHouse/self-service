@@ -1,6 +1,7 @@
 """
 SQLAlchemy Database Models
 """
+
 import datetime
 from datetime import timedelta
 
@@ -16,6 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.sql.functions import now
 from selfservice import db
 
+
 class ResetToken(db.Model):
     """
     Reset tokens are generated once an identity has been verified. They allow
@@ -25,13 +27,18 @@ class ResetToken(db.Model):
     __tablename__ = "token"
     id = Column(Integer, primary_key=True)
     username = Column(String(64), nullable=False)
-    expires = Column(DateTime, default=func.timezone("UTC", now()+timedelta(minutes=10)), nullable=False)
+    expires = Column(
+        DateTime,
+        default=func.timezone("UTC", now() + timedelta(minutes=10)),
+        nullable=False,
+    )
     token = Column(String(36))
     session = Column(String(36), ForeignKey("session.id"))
     used = Column(Boolean)
 
     def is_expired(self) -> bool:
         return self.expires < datetime.datetime.now()
+
 
 class RecoverySession(db.Model):
     """
@@ -43,7 +50,11 @@ class RecoverySession(db.Model):
     __tablename__ = "session"
     id = Column(String(36), primary_key=True)
     username = Column(String(64), nullable=False)
-    expires = Column(DateTime, default=func.timezone("UTC", now()+timedelta(minutes=30)), nullable=False)
+    expires = Column(
+        DateTime,
+        default=func.timezone("UTC", now() + timedelta(minutes=30)),
+        nullable=False,
+    )
 
     def is_expired(self) -> bool:
         return self.expires < datetime.datetime.now()

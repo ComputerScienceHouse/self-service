@@ -1,6 +1,7 @@
 """
 Flask blueprint for handling identity verification and account recovery.
 """
+
 import datetime
 import uuid
 import logging
@@ -266,7 +267,12 @@ def admin():
         session_id = str(uuid.uuid4())
 
         # Create the object in the database.
-        session_data = RecoverySession(id=session_id, username=request.form["username"], expires=datetime.datetime.now()+datetime.timedelta(hours=int(request.form["expireTime"])))
+        session_data = RecoverySession(
+            id=session_id,
+            username=request.form["username"],
+            expires=datetime.datetime.now()
+            + datetime.timedelta(hours=int(request.form["expireTime"])),
+        )
         db.session.add(session_data)
         db.session.commit()
 
@@ -278,7 +284,8 @@ def admin():
         {
             "username": s.username,
             "session_expired": (
-                s.session_expires < datetime.datetime.now() or s.token_expires < datetime.datetime.now()
+                s.session_expires < datetime.datetime.now()
+                or s.token_expires < datetime.datetime.now()
             ),
             "token_exists": s.token_id is not None,
             "token_expires": s.token_expires,

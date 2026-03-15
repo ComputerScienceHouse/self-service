@@ -10,6 +10,7 @@ from email.utils import formatdate
 from twilio.rest import Client
 from flask import current_app
 
+
 def email_recovery(username, address, token):
     """
     Send verification emails based on below template.
