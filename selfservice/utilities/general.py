@@ -4,25 +4,11 @@ General helper funtions that reduce copied code.
 
 import smtplib
 
-from datetime import datetime, timedelta
+import datetime
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from twilio.rest import Client
 from flask import current_app
-
-
-def is_expired(timestamp, minutes):
-    """
-    Helper function to quickly check session expiry.
-    """
-
-    if not timestamp:
-        return None
-
-    exptime = datetime.utcnow() - timedelta(minutes=minutes)
-    expired = bool(timestamp < exptime)
-    return expired
-
 
 def email_recovery(username, address, token):
     """
