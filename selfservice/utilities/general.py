@@ -4,7 +4,6 @@ General helper funtions that reduce copied code.
 
 import smtplib
 
-import datetime
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from twilio.rest import Client

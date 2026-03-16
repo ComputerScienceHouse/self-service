@@ -37,6 +37,7 @@ class ResetToken(db.Model):
     used = Column(Boolean)
 
     def is_expired(self) -> bool:
+        """Returns whether the Token is expired"""
         return self.expires < datetime.datetime.now()
 
 
@@ -57,6 +58,7 @@ class RecoverySession(db.Model):
     )
 
     def is_expired(self) -> bool:
+        """Returns whether the RecoverySession is expired"""
         return self.expires < datetime.datetime.now()
 
 
