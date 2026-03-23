@@ -281,18 +281,19 @@ def admin():
     members = get_members()
     uid = str(flask_session["userinfo"].get("preferred_username", ""))
 
-    last_sessions_query = RecoverySession.query.join(
-            ResetToken, 
-            RecoverySession.id == ResetToken.session
-        ).with_entities(
+    last_sessions_query = (
+        RecoverySession.query.join(ResetToken, RecoverySession.id == ResetToken.session)
+        .with_entities(
             RecoverySession.username,
             RecoverySession.expires.label("session_expires"),
             ResetToken.id.label("token_id"),
             ResetToken.expires.label("token_expires"),
             ResetToken.used,
-        ).order_by(
-            ResetToken.expires.desc()
-        ).limit(20).all()
+        )
+        .order_by(ResetToken.expires.desc())
+        .limit(20)
+        .all()
+    )
 
     last_sessions = [
         {
