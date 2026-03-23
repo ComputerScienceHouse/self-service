@@ -1,7 +1,7 @@
 import os
 
 # Flask config
-DEBUG = lower(os.environ.get("DEBUG", "false")) == "true"
+DEBUG = os.environ.get("DEBUG", "false").lower() == "true"
 IP = os.environ.get("IP", "0.0.0.0")
 PORT = os.environ.get("PORT", "8080")
 SERVER_NAME = os.environ.get("SERVER_NAME", "localhost:8080")
