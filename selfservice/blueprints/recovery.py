@@ -200,8 +200,6 @@ def verify_phone(recovery_id):
     session = RecoverySession.query.filter_by(id=recovery_id).first()
     phone = PhoneVerification.query.filter_by(session=recovery_id).first()
 
-    print(phone.phone_number)
-
     service_sid = current_app.config.get("TWILIO_SERVICE_SID")
     client = Client(
         current_app.config.get("TWILIO_SID"), current_app.config.get("TWILIO_TOKEN")
