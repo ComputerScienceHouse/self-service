@@ -73,7 +73,7 @@ def get_kc_user_id(username):
     )
     conn = admin.connection
     user = conn.raw_get(
-        f"admin/realms/csh/users?first=0&max=20&search={username}@csh.rit.edu"
+        f"admin/realms/csh/users?first=0&max=20&username={username}&exact=true"
     )
     user_id = json.loads(user.text)[0]["id"]
     return user_id
