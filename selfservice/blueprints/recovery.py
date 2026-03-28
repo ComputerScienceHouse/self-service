@@ -3,13 +3,14 @@ Flask blueprint for handling identity verification and account recovery.
 """
 
 import phonenumbers
+import datetime
 import uuid
 import logging
 
 from flask import Blueprint, render_template, request, redirect, flash
 from flask import session as flask_session
 
-from selfservice.utilities.general import is_expired, email_recovery, phone_recovery
+from selfservice.utilities.general import email_recovery, phone_recovery
 from selfservice.utilities.reset import (
     generate_token,
     passwd_reset,
@@ -91,7 +92,7 @@ def verify_identity(recovery_id):
     methods = verif_methods(session.username)
 
     # Make sure it isn't expired.
-    if is_expired(session.created, 10):
+    if session.is_expired():
         flash("Sorry, your session has expired.")
         return redirect("/recovery")
 
@@ -133,7 +134,7 @@ def method_selection(recovery_id, method):
     methods = verif_methods(session.username)
 
     # Make sure it isn't expired.
-    if is_expired(session.created, 10):
+    if session.is_expired():
         flash("Sorry, your session has expired.")
         return redirect("/recovery")
 
@@ -230,24 +231,23 @@ def reset_password():
 
     token_data = ResetToken.query.filter_by(token=token).first()
 
-    # Redirect if the token provided isn't valid.
-    if (
-        not token
-        or not token_data
-        or is_expired(token_data.created, 30)
-        or token_data.used
-    ):
-        flash(
-            "Oops! Invalid or expired reset token. Each token is only "
-            + "valid for 30 minutes after it is issued."
-        )
+    if not token or not token_data:
+        flash("Oops! No reset token provided. Please try again.")
+        return redirect("/recovery")
+
+    if token_data.used:
+        flash("This recovery token has already been used.")
+        return redirect("/recovery")
+
+    if token_data.is_expired():
+        flash("Oops! Your recovery token expired.")
         return redirect("/recovery")
 
         # Display the reset page.
     if request.method == "GET":
         return render_template("reset.html", token=token_data.token, version=version)
 
-        # Lets actually do the reset.
+        # Actually do the reset.
     if request.form["password"] == request.form["verify"]:
         if len(request.form["password"]) >= 12:
             passwd_reset(
@@ -287,7 +287,12 @@ def admin():
         session_id = str(uuid.uuid4())
 
         # Create the object in the database.
-        session_data = RecoverySession(id=session_id, username=request.form["username"])
+        session_data = RecoverySession(
+            id=session_id,
+            username=request.form["username"],
+            expires=datetime.datetime.now()
+            + datetime.timedelta(hours=int(request.form["expireTime"])),
+        )
         db.session.add(session_data)
         db.session.commit()
 
@@ -295,31 +300,34 @@ def admin():
 
     members = get_members()
     uid = str(flask_session["userinfo"].get("preferred_username", ""))
+
+    last_sessions_query = (
+        RecoverySession.query.join(ResetToken, RecoverySession.id == ResetToken.session)
+        .with_entities(
+            RecoverySession.username,
+            RecoverySession.expires.label("session_expires"),
+            ResetToken.id.label("token_id"),
+            ResetToken.expires.label("token_expires"),
+            ResetToken.used,
+        )
+        .order_by(ResetToken.expires.desc())
+        .limit(20)
+        .all()
+    )
+
     last_sessions = [
         {
             "username": s.username,
-            "session_created": s.session_created,
             "session_expired": (
-                (is_expired(s.session_created, 10) and not s.token_created)
-                or is_expired(s.token_created, 30)
+                s.session_expires < datetime.datetime.now()
+                or s.token_expires < datetime.datetime.now()
             ),
-            "token_created": s.token_created,
+            "token_exists": s.token_id is not None,
+            "token_expires": s.token_expires,
             "used": s.used,
         }
-        for s in RecoverySession.query.outerjoin(
-            ResetToken, RecoverySession.id == ResetToken.session
-        )
-        .with_entities(
-            RecoverySession.username,
-            RecoverySession.created.label("session_created"),
-            ResetToken.created.label("token_created"),
-            ResetToken.used,
-        )
-        .order_by(RecoverySession.created.desc())
-        .limit(20)
-        .all()
+        for s in last_sessions_query
     ]
-
     return render_template(
         "admin.html",
         version=version,

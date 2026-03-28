@@ -72,12 +72,12 @@ ldap_uri = ldap_srvs[0].hostname
 ipa = Client(ldap_uri, version="2.215")
 
 # Configure rate limiting
-if not app.config["DEBUG"]:
-    limiter = Limiter(
-        get_remote_address, app=app, default_limits=["50 per day", "10 per hour"]
-    )
-else:
-    limiter = Limiter(get_remote_address, app=app, default_limits=[])
+# if not app.config["DEBUG"]:
+#     limiter = Limiter(
+#         get_remote_address, app=app, default_limits=["50 per day", "10 per hour"]
+#     )
+# else:
+#    limiter = Limiter(get_remote_address, app=app, default_limits=[])
 
 # Initialize QR Code Generator
 qr = QRcode(app)
@@ -115,7 +115,7 @@ def index():
 
 
 @app.route("/health")
-@limiter.exempt
+# @limiter.exempt
 def health():
     """
     Shows an ok status if the application is up and running
