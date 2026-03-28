@@ -72,32 +72,6 @@ def generate_token(session):
     return token
 
 
-def generate_pin(session):
-    """
-    Generate a six-digit pin for SMS verification.
-
-    Keyword arguments:
-    session -- Instance of RecoverySession model
-    """
-
-    # TODO: do this too
-
-    # Generate a random UUID for reset token.
-    token = f"{random.randrange(1, 10**6):06}"
-
-    # Verify that this session creates only one token.
-    previous = ResetToken.query.filter_by(session=session.id).first()
-    if previous:
-        raise TokenAlreadyExists()
-
-    # Create the object in the database.
-    reset = PhoneVerification(code=token, session=session.id)
-    db.session.add(reset)
-    db.session.commit()
-
-    return token
-
-
 def valid_token(token_id):
     """
     Ensure that the token provided is still valid.
@@ -138,12 +112,11 @@ def passwd_reset(username, password):
 
     # FreeIPA automatically expires the password set through the previous
     # method, so we need to use their password change API to get past that.
-    res = requests.post(
+    requests.post(
         f"https://{ldap_uri}/ipa/session/change_password",
         data={"user": username, "old_password": password, "new_password": password},
         timeout=30,
     )
-    print(res)
 
 
 def passwd_change(username, old_pw, new_pw):

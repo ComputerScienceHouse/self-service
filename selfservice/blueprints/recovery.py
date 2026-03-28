@@ -12,7 +12,6 @@ from flask import session as flask_session
 from selfservice.utilities.general import is_expired, email_recovery, phone_recovery
 from selfservice.utilities.reset import (
     generate_token,
-    generate_pin,
     passwd_reset,
     TokenAlreadyExists,
 )
