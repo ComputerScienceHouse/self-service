@@ -57,4 +57,4 @@ def phone_recovery(phone):
     verification = client.verify.v2.services(service_sid).verifications.create(
         channel="sms", to=phone
     )
-    LOG.info(f"Verification sent: {verification}")
+    LOG.info("Verification sent: %s", verification)

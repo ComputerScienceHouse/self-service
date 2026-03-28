@@ -2,13 +2,12 @@
 Functions relating to the verification of users and subsequent account resets.
 """
 
-import random
 import uuid
 import requests
 import ldap
 import srvlookup
 
-from selfservice.models import ResetToken, PhoneVerification
+from selfservice.models import ResetToken
 from selfservice import db, app
 
 

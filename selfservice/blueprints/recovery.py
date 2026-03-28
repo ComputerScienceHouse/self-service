@@ -2,26 +2,25 @@
 Flask blueprint for handling identity verification and account recovery.
 """
 
-import phonenumbers
 import datetime
-import uuid
 import logging
+import uuid
 
+import phonenumbers
 from flask import Blueprint, render_template, request, redirect, flash
+from flask import current_app
 from flask import session as flask_session
+from twilio.rest import Client
 
+from selfservice import db, auth, xcaptcha, ldap, version, OIDC_PROVIDER
+from selfservice.models import RecoverySession, PhoneVerification, ResetToken
 from selfservice.utilities.general import email_recovery, phone_recovery
+from selfservice.utilities.ldap import verif_methods, get_members
 from selfservice.utilities.reset import (
     generate_token,
     passwd_reset,
     TokenAlreadyExists,
 )
-from selfservice.utilities.ldap import verif_methods, get_members
-from twilio.rest import Client
-from flask import current_app
-
-from selfservice.models import RecoverySession, PhoneVerification, ResetToken
-from selfservice import db, auth, xcaptcha, ldap, version, OIDC_PROVIDER
 
 LOG = logging.getLogger(__name__)
 
