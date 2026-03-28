@@ -80,6 +80,8 @@ def generate_pin(session):
     session -- Instance of RecoverySession model
     """
 
+    # TODO: do this too
+
     # Generate a random UUID for reset token.
     token = f"{random.randrange(1, 10**6):06}"
 
@@ -88,7 +90,7 @@ def generate_pin(session):
     if previous:
         raise TokenAlreadyExists()
 
-        # Create the object in the database.
+    # Create the object in the database.
     reset = PhoneVerification(code=token, session=session.id)
     db.session.add(reset)
     db.session.commit()
@@ -136,11 +138,12 @@ def passwd_reset(username, password):
 
     # FreeIPA automatically expires the password set through the previous
     # method, so we need to use their password change API to get past that.
-    requests.post(
+    res = requests.post(
         f"https://{ldap_uri}/ipa/session/change_password",
         data={"user": username, "old_password": password, "new_password": password},
         timeout=30,
     )
+    print(res)
 
 
 def passwd_change(username, old_pw, new_pw):

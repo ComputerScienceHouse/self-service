@@ -2,6 +2,7 @@
 Flask blueprint for handling identity verification and account recovery.
 """
 
+import phonenumbers
 import uuid
 import logging
 
@@ -16,6 +17,8 @@ from selfservice.utilities.reset import (
     TokenAlreadyExists,
 )
 from selfservice.utilities.ldap import verif_methods, get_members
+from twilio.rest import Client
+from flask import current_app
 
 from selfservice.models import RecoverySession, PhoneVerification, ResetToken
 from selfservice import db, auth, xcaptcha, ldap, version, OIDC_PROVIDER
@@ -36,7 +39,6 @@ def create_session():
         return render_template("recovery.html", version=version)
 
     if xcaptcha.verify():
-
         # If we can't find an account, flash error.
         try:
             member = ldap.get_member(request.form["username"], True)
@@ -159,8 +161,16 @@ def method_selection(recovery_id, method):
             return redirect("/recovery")
 
     elif method == "phone":
+        formatted_phone = phonenumbers.format_number(
+            phonenumbers.parse(methods["phone"][index]["data"], "US"),
+            phonenumbers.PhoneNumberFormat.E164,
+        )
+
         try:
-            token = generate_pin(session)
+            # Create the object in the database.
+            reset = PhoneVerification(session=session.id, phone_number=formatted_phone)
+            db.session.add(reset)
+            db.session.commit()
         except TokenAlreadyExists:
             flash(
                 "This session has already been used to generate a "
@@ -170,7 +180,7 @@ def method_selection(recovery_id, method):
             return redirect("/recovery")
 
         try:
-            phone_recovery(phone=methods["phone"][index]["data"], token=token)
+            phone_recovery(phone=formatted_phone)
             return render_template(
                 "phone.html",
                 recovery_id=session.id,
@@ -189,9 +199,20 @@ def verify_phone(recovery_id):
     Check the provided verification code against our stored code.
     """
     session = RecoverySession.query.filter_by(id=recovery_id).first()
-    token = PhoneVerification.query.filter_by(session=recovery_id).first()
+    phone = PhoneVerification.query.filter_by(session=recovery_id).first()
 
-    if request.form["verify"] == token.code:
+    print(phone.phone_number)
+
+    service_sid = current_app.config.get("TWILIO_SERVICE_SID")
+    client = Client(
+        current_app.config.get("TWILIO_SID"), current_app.config.get("TWILIO_TOKEN")
+    )
+
+    verification_check = client.verify.v2.services(
+        service_sid
+    ).verification_checks.create(to=phone.phone_number, code=request.form["verify"])
+
+    if verification_check.status == "approved":
         token = ResetToken.query.filter_by(session=recovery_id).first()
         if not token:
             token = generate_token(session)

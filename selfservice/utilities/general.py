@@ -3,12 +3,15 @@ General helper funtions that reduce copied code.
 """
 
 import smtplib
+import logging
 
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from twilio.rest import Client
 from flask import current_app
+
+LOG = logging.getLogger(__name__)
 
 
 def is_expired(timestamp, minutes):
@@ -56,24 +59,16 @@ def email_recovery(username, address, token):
     server.quit()
 
 
-def phone_recovery(phone, token):
+def phone_recovery(phone):
     """
     Use Twilio to send token.
     """
-    from_number = current_app.config.get("TWILIO_NUMBER")
     service_sid = current_app.config.get("TWILIO_SERVICE_SID")
     client = Client(
         current_app.config.get("TWILIO_SID"), current_app.config.get("TWILIO_TOKEN")
     )
 
-    # REMOVE ME
-    client.http_client.logger = current_app.logger
-    print(f"twilio client: {client}")
-    # REMOVE ME
-
-    body = f"Your CSH account recovery PIN is: {token}"
-
-    m = client.messages.create(
-        to=phone, from_=from_number, body=body, messaging_service_sid=service_sid
+    verification = client.verify.v2.services(service_sid).verifications.create(
+        channel="sms", to=phone
     )
-    print(m)
+    LOG.info(f"Verification sent: {verification}")
