@@ -9,7 +9,6 @@ import ldap
 import srvlookup
 
 from selfservice.models import ResetToken, PhoneVerification
-from selfservice.utilities.general import is_expired
 from selfservice import db, app
 
 
@@ -64,7 +63,11 @@ def generate_token(session):
 
         # Create the object in the database.
     reset = ResetToken(
-        username=session.username, token=token, session=session.id, used=False
+        username=session.username,
+        token=token,
+        session=session.id,
+        used=False,
+        expires=session.expires,
     )
     db.session.add(reset)
     db.session.commit()
@@ -107,9 +110,8 @@ def valid_token(token_id):
     token_data = ResetToken.query.filter_by(token=token_id).first()
 
     if token_data:
-        if is_expired(token_data.created, 30):
-            return False
-        return True
+        if not token_data.is_expired():
+            return True
     return False
 
 

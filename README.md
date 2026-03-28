@@ -33,7 +33,7 @@
       
 1. Run migrations:
    1. ```shell script
-      flask db migrate
+      flask db upgrade
       ```
       
 1. Run the application:
