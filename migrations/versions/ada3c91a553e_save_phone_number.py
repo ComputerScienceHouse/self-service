@@ -1,7 +1,7 @@
 """save phone number
 
 Revision ID: ada3c91a553e
-Revises: fdb69cd98e19
+Revises: 92c9d8ea5b74
 Create Date: 2026-02-18 21:07:12.041639
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "ada3c91a553e"
-down_revision = "fdb69cd98e19"
+down_revision = "92c9d8ea5b74"
 branch_labels = None
 depends_on = None
 
