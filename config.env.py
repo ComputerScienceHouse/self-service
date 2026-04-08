@@ -31,7 +31,7 @@ KC_ADMIN_PW = os.environ.get("KC_ADMIN_PW", "")
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     "DATABASE_URI",
-    "postgresql://selfservice:supersecretpassword@localhost:5433/selfservice"
+    "postgresql://selfservice:supersecretpassword@localhost:5433/selfservice",
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -44,5 +44,4 @@ XCAPTCHA_SIZE = "normal"
 
 TWILIO_SID = os.environ.get("TWILIO_SID", "")
 TWILIO_TOKEN = os.environ.get("TWILIO_TOKEN", "")
-TWILIO_NUMBER = os.environ.get("TWILIO_NUMBER", "")
 TWILIO_SERVICE_SID = os.environ.get("TWILIO_SERVICE_SID", "")

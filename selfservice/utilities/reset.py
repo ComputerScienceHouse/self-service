@@ -2,13 +2,12 @@
 Functions relating to the verification of users and subsequent account resets.
 """
 
-import random
 import uuid
 import requests
 import ldap
 import srvlookup
 
-from selfservice.models import ResetToken, PhoneVerification
+from selfservice.models import ResetToken
 from selfservice import db, app
 
 
@@ -69,30 +68,6 @@ def generate_token(session):
         used=False,
         expires=session.expires,
     )
-    db.session.add(reset)
-    db.session.commit()
-
-    return token
-
-
-def generate_pin(session):
-    """
-    Generate a six-digit pin for SMS verification.
-
-    Keyword arguments:
-    session -- Instance of RecoverySession model
-    """
-
-    # Generate a random UUID for reset token.
-    token = f"{random.randrange(1, 10**6):06}"
-
-    # Verify that this session creates only one token.
-    previous = ResetToken.query.filter_by(session=session.id).first()
-    if previous:
-        raise TokenAlreadyExists()
-
-        # Create the object in the database.
-    reset = PhoneVerification(code=token, session=session.id)
     db.session.add(reset)
     db.session.commit()
 

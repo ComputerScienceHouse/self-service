@@ -69,7 +69,7 @@ class PhoneVerification(db.Model):
     """
 
     __tablename__ = "phone_codes"
-    code = Column(String(6), primary_key=True)
+    phone_number = Column(String(12), primary_key=True)
     session = Column(String(36), ForeignKey("session.id"))
 
 

@@ -38,7 +38,8 @@ def verif_methods(username):
         for number in user.get("telephoneNumber"):
             stripped = re.sub("[^0-9]", "", number)
             if len(stripped) == 10:
-                methods["phone"].append(stripped)
+                display = f"(XXX) XXX-{stripped[-4:]}"
+                methods["phone"].append({"data": stripped, "display": display})
 
     if user.ritDn:
         methods["rit"] = user.ritDn.split(",")[0].replace("uid=", "")
